@@ -189,7 +189,8 @@
   </style>
 </head>
 <body>
-
+  <button onclick="showSurface()">🌄 แสดงกราฟ 3D Surface</button>
+<button onclick="exportCSV()">💾 ดาวน์โหลด CSV</button>
   <div class="container">
     <h2>🚗 ECU Map Viewer – Isuzu D-Max 1.9L</h2>
 
@@ -401,6 +402,94 @@
         dtc_off: "ตารางหรือค่าที่ใช้ในการปิดรหัสข้อผิดพลาด (DTC) เพื่อไม่ให้ไฟแจ้งเตือนปรากฏบนหน้าปัด"
       };
       document.getElementById("glossary").innerText = descriptions[type] || "ไม่พบคำอธิบายสำหรับ Map ชนิดนี้";
+    }
+    const mapUnits = {
+  fuel: "mg/stroke",
+  fuel_quantity: "mg/stroke",
+  injection_timing: "° BTDC",
+  boost_pressure: "mbar",
+  rail_pressure: "bar",
+  torque_limiter: "%",
+  drivers_wish: "%",
+  turbo_duty: "%",
+  smoke_limiter: "mg/stroke",
+  iat_ect_correction: "%",
+  egr: "%",
+  throttle: "%",
+  dtc_off: ""
+};
+    const unit = mapUnits[data.type] || "";
+const hover = `<b>LOAD:</b> %{x}<br><b>RPM:</b> %{y}<br><b>ค่า:</b> %{z} ${unit}<extra></extra>`;
+
+Plotly.newPlot(chartDiv, [{
+  z: currentMap,
+  x: xAxis,
+  y: yAxis,
+  type: 'heatmap',
+  colorscale: 'Jet',
+  hoverongaps: false,
+  hovertemplate: hover
+}], {
+  title: `${data.type.toUpperCase()} Map (${unit}) – Offset ${data.offset}`,
+  width: 700,
+  height: 700,
+  margin: { t: 60, l: 60, r: 30, b: 40 },
+  xaxis: { title: "โหลด (%)", tickfont: { size: 12 } },
+  yaxis: { title: "รอบเครื่อง (RPM)", tickfont: { size: 12 } },
+  font: { family: "Arial", size: 14 }
+});
+    const hover = `<b>LOAD:</b> %{x}<br><b>RPM:</b> %{y}<br><b>ค่า:</b> %{z} ${unit}<extra></extra>`;
+
+Plotly.newPlot(chartDiv, [{
+  z: updatedMap,
+  x: xAxis,
+  y: yAxis,
+  type: 'heatmap',
+  colorscale: 'Jet',
+  hoverongaps: false,
+  hovertemplate: hover
+}], {
+  title: `🛠 แก้ไข ${mapType.toUpperCase()} Map (${unit})`,
+  width: 700,
+  height: 700,
+  margin: { t: 60, l: 60, r: 30, b: 40 },
+  xaxis: { title: "โหลด (%)", tickfont: { size: 12 } },
+  yaxis: { title: "รอบเครื่อง (RPM)", tickfont: { size: 12 } },
+  font: { family: "Arial", size: 14 }
+});
+    function exportCSV() {
+  let csv = "RPM/Load," + xAxis.join(",") + "\n";
+  currentMap.forEach((row, i) => {
+    csv += yAxis[i] + "," + row.join(",") + "\n";
+  });
+
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", "ecu_map_export.csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+    }
+    function showSurface() {
+  Plotly.newPlot("mapChart", [{
+    z: currentMap,
+    x: xAxis,
+    y: yAxis,
+    type: 'surface',
+    colorscale: 'Jet'
+  }], {
+    title: "🌄 3D Surface Preview",
+    autosize: true,
+    width: 800,
+    height: 600,
+    scene: {
+      xaxis: { title: "LOAD (%)" },
+      yaxis: { title: "RPM" },
+      zaxis: { title: "ค่า (Value)" }
+    }
+  });
     }
   </script>
 </body>
