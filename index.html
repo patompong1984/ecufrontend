@@ -39,11 +39,23 @@
   <input type="file" id="binFile" accept=".bin,.ori,.hex"><br>
 
   <label>🗂️ ประเภท Map:</label>
-  <select id="mapType">
-    <option value="fuel">Fuel</option>
-    <option value="ignition">Ignition</option>
-    <option value="boost">Boost</option>
-  </select><br>
+<select id="mapType">
+  <option value="fuel">Fuel</option>
+  <option value="torque_limiter">Torque Limiter Map</option>
+  <option value="drivers_wish">Driver’s Wish Map</option>
+  <option value="fuel_quantity">Fuel Quantity Map</option>
+  <option value="injection_timing">Injection Timing Map</option>
+  <option value="boost_pressure">Boost Pressure Map</option>
+  <option value="rail_pressure">Rail Pressure Map</option>
+  <option value="turbo_duty">Turbo Duty Cycle Map</option>
+  <option value="smoke_limiter">Smoke Limiter Map</option>
+  <option value="iat_ect_correction">IAT & ECT Correction Maps</option>
+  <option value="egr">EGR Map</option>
+  <option value="throttle">Throttle Valve Map</option>
+  <option value="dtc_off">DTC Off Table</option>
+
+</select><br>
+
 
   <button onclick="sendFile()">🔍 วิเคราะห์ ECU Map</button>
 
