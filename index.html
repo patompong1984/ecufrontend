@@ -186,6 +186,13 @@
         font-size: 10px;
       }
     }
+    .chart-controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 15px;
+      margin-bottom: 10px;
+    }
   </style>
 </head>
 <body>
@@ -231,6 +238,10 @@
 
     <div class="chart-container">
       <h3 class="section-title">📈 กราฟ ECU Map:</h3>
+      <div class="chart-controls">
+        <button onclick="updateChartDisplay('heatmap')">📊 แสดงกราฟ 2D (Heatmap)</button>
+        <button onclick="updateChartDisplay('surface')">🏞️ แสดงกราฟ 3D (Surface)</button>
+      </div>
       <div id="mapChart"></div>
     </div>
 
@@ -239,12 +250,12 @@
       <div id="editor"></div>
       <button onclick="updateChart()">🔄 อัปเดตกราฟหลังแก้ไข</button>
     </div>
-     <button onclick="showSurface()">🌄 แสดงกราฟ 3D Surface</button>
      <button onclick="exportCSV()">💾 ดาวน์โหลด CSV</button>
   </div>
 
   <script>
-    let currentMap = [], xAxis = [], yAxis = [], currentMapType = ''; // เพิ่ม currentMapType
+    let currentMap = [], xAxis = [], yAxis = [], currentMapType = '';
+    let currentChartType = 'heatmap'; // Default chart type
 
     // Initial glossary load
     document.addEventListener('DOMContentLoaded', () => {
@@ -253,7 +264,7 @@
       document.getElementById('result').innerText = "🧾 ผลลัพธ์จะแสดงที่นี่";
     });
 
-    // หน่วยสำหรับแต่ละ Map (ย้ายมาไว้ด้านบนสุดเพื่อให้เข้าถึงได้ง่าย)
+    // หน่วยสำหรับแต่ละ Map
     const mapUnits = {
         fuel: "mg/stroke",
         fuel_quantity: "mg/stroke",
@@ -314,32 +325,8 @@
 
         resultDiv.innerText = `✅ วิเคราะห์สำเร็จ: ${data.type} Map (Offset: ${data.offset})\n\n` + JSON.stringify(currentMap, null, 2);
 
-        // กำหนดหน่วยและ hover template ที่นี่ หลังจากได้ data.type
-        const unit = mapUnits[data.type] || "";
-        const hoverTemplate = `<b>โหลด:</b> %{x}<br><b>รอบเครื่อง:</b> %{y}<br><b>ค่า:</b> %{z} ${unit}<extra></extra>`;
-
-        // Responsive chart layout
-        const chartLayout = {
-          title: `${data.type.toUpperCase()} Map (${unit}) – Offset ${data.offset}`, // ใช้ unit ใน Title
-          autosize: true, // Auto-adjust size
-          margin: { t: 60, l: 60, r: 30, b: 40 },
-          xaxis: { title: "โหลด (%)", tickfont: { size: 12 } },
-          yaxis: { title: "รอบเครื่อง (RPM)", tickfont: { size: 12 } },
-          font: { family: "Kanit", size: 14, color: 'var(--text-color)' },
-          paper_bgcolor: 'var(--card-bg)', // Chart background
-          plot_bgcolor: 'var(--card-bg)'  // Plot area background
-        };
-
-        Plotly.newPlot(chartDiv, [{
-          z: currentMap,
-          x: xAxis,
-          y: yAxis,
-          type: 'heatmap',
-          colorscale: 'Jet',
-          hoverongaps: false,
-          hovertemplate: hoverTemplate // ใช้ hoverTemplate ที่กำหนด
-        }], chartLayout, { responsive: true }); // Make chart responsive
-
+        // วาดกราฟเริ่มต้นเป็น 2D (heatmap) เสมอ
+        plotMap(currentMap, xAxis, yAxis, currentMapType, 'heatmap', data.offset);
         log("📊 วาดกราฟสำเร็จแล้ว", "success");
         renderEditor(currentMap);
 
@@ -356,6 +343,57 @@
         logDiv.scrollTop = logDiv.scrollHeight; // Scroll to bottom
       }
     }
+
+    // ฟังก์ชันใหม่สำหรับวาดกราฟ (รวม 2D และ 3D)
+    function plotMap(mapData, xData, yData, mapType, chartType, offset = null) {
+      const chartDiv = document.getElementById("mapChart");
+      const unit = mapUnits[mapType] || "";
+      const hoverTemplate = `<b>โหลด:</b> %{x}<br><b>รอบเครื่อง:</b> %{y}<br><b>ค่า:</b> %{z} ${unit}<extra></extra>`;
+
+      let plotData = [{
+        z: mapData,
+        x: xData,
+        y: yData,
+        type: chartType, // ใช้ chartType ที่ส่งมา ('heatmap' หรือ 'surface')
+        colorscale: 'Jet',
+        hoverongaps: false
+      }];
+
+      let layout;
+
+      if (chartType === 'heatmap') {
+        plotData[0].hovertemplate = hoverTemplate; // Heatmap ใช้ hovertemplate
+        layout = {
+          title: `${mapType.toUpperCase()} Map (${unit})` + (offset ? ` – Offset ${offset}` : ''),
+          autosize: true,
+          margin: { t: 60, l: 60, r: 30, b: 40 },
+          xaxis: { title: "โหลด (%)", tickfont: { size: 12 } },
+          yaxis: { title: "รอบเครื่อง (RPM)", tickfont: { size: 12 } },
+          font: { family: "Kanit", size: 14, color: 'var(--text-color)' },
+          paper_bgcolor: 'var(--card-bg)',
+          plot_bgcolor: 'var(--card-bg)'
+        };
+      } else if (chartType === 'surface') {
+        // Surface plot doesn't use hovertemplate in the same way, but can configure scene.
+        layout = {
+          title: `🌄 3D Surface Preview - ${mapType.toUpperCase()} Map (${unit})` + (offset ? ` – Offset ${offset}` : ''),
+          autosize: true,
+          margin: { t: 60, l: 60, r: 30, b: 40 },
+          scene: {
+            xaxis: { title: "โหลด (%)" },
+            yaxis: { title: "รอบเครื่อง (RPM)" },
+            zaxis: { title: `ค่า (${unit})` }
+          },
+          font: { family: "Kanit", size: 14, color: 'var(--text-color)' },
+          paper_bgcolor: 'var(--card-bg)',
+          plot_bgcolor: 'var(--card-bg)'
+        };
+      }
+      
+      Plotly.newPlot(chartDiv, plotData, layout, { responsive: true });
+      currentChartType = chartType; // Update current chart type
+    }
+
 
     function renderEditor(map) {
       const editorDiv = document.getElementById("editor");
@@ -380,35 +418,24 @@
         updatedMap[i][j] = parseFloat(input.value) || 0;
       });
 
-      // ดึง unit สำหรับ Map ปัจจุบัน (ใช้ currentMapType ที่เก็บไว้)
-      const unit = mapUnits[currentMapType] || "";
-      const hoverTemplate = `<b>โหลด:</b> %{x}<br><b>รอบเครื่อง:</b> %{y}<br><b>ค่า:</b> %{z} ${unit}<extra></extra>`;
+      currentMap = updatedMap; // Update currentMap with edited values
 
-      const chartDiv = document.getElementById("mapChart");
-      const chartLayout = {
-        title: `🛠 แก้ไข ${currentMapType.toUpperCase()} Map (${unit})`, // ใช้ currentMapType และ unit
-        autosize: true,
-        margin: { t: 60, l: 60, r: 30, b: 40 },
-        xaxis: { title: "โหลด (%)", tickfont: { size: 12 } },
-        yaxis: { title: "รอบเครื่อง (RPM)", tickfont: { size: 12 } },
-        font: { family: "Kanit", size: 14, color: 'var(--text-color)' },
-        paper_bgcolor: 'var(--card-bg)',
-        plot_bgcolor: 'var(--card-bg)'
-      };
-
-      Plotly.newPlot(chartDiv, [{
-        z: updatedMap,
-        x: xAxis,
-        y: yAxis,
-        type: 'heatmap',
-        colorscale: 'Jet',
-        hoverongaps: false,
-        hovertemplate: hoverTemplate // ใช้ hoverTemplate ที่กำหนด
-      }], chartLayout, { responsive: true });
+      // วาดกราฟใหม่ด้วยค่าที่แก้ไขและประเภทกราฟปัจจุบัน
+      plotMap(currentMap, xAxis, yAxis, currentMapType, currentChartType);
 
       document.getElementById("result").innerText = "🛠 Map ถูกแก้ไขแล้ว:\n\n" + JSON.stringify(updatedMap, null, 2);
       document.getElementById("log").appendChild(document.createElement("div")).className = "log-success";
       document.getElementById("log").lastChild.innerText = "✅ กราฟและข้อมูลอัปเดตเรียบร้อย!";
+    }
+
+    // ฟังก์ชันสำหรับเปลี่ยนประเภทกราฟ
+    function updateChartDisplay(chartType) {
+        if (!currentMap || currentMap.length === 0) {
+            alert("กรุณาวิเคราะห์ Map ก่อนแสดงกราฟ");
+            return;
+        }
+        plotMap(currentMap, xAxis, yAxis, currentMapType, chartType);
+        console.log(`Switched to ${chartType} chart.`);
     }
 
     function showGlossary(type) {
@@ -431,7 +458,6 @@
     }
     
     function exportCSV() {
-      // ใช้ currentMap, xAxis, yAxis ที่ถูกกำหนดจาก sendFile()
       if (!currentMap || currentMap.length === 0) {
           alert("กรุณาวิเคราะห์ Map ก่อนดาวน์โหลด CSV");
           return;
@@ -446,41 +472,11 @@
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.setAttribute("href", url);
-      link.setAttribute("download", `${currentMapType}_map_export.csv`); // ชื่อไฟล์ตาม Map Type
+      link.setAttribute("download", `${currentMapType}_map_export.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       console.log("CSV Exported!");
-    }
-
-    function showSurface() {
-      if (!currentMap || currentMap.length === 0) {
-          alert("กรุณาวิเคราะห์ Map ก่อนแสดงกราฟ 3D Surface");
-          return;
-      }
-
-      const unit = mapUnits[currentMapType] || ""; // ใช้ currentMapType
-      
-      Plotly.newPlot("mapChart", [{
-        z: currentMap,
-        x: xAxis,
-        y: yAxis,
-        type: 'surface',
-        colorscale: 'Jet'
-      }], {
-        title: `🌄 3D Surface Preview - ${currentMapType.toUpperCase()} Map (${unit})`, // เพิ่ม Map Type และหน่วย
-        autosize: true,
-        margin: { t: 60, l: 60, r: 30, b: 40 },
-        scene: {
-          xaxis: { title: "โหลด (%)" },
-          yaxis: { title: "รอบเครื่อง (RPM)" },
-          zaxis: { title: `ค่า (${unit})` } // เพิ่มหน่วยที่ Z-axis
-        },
-        font: { family: "Kanit", size: 14, color: 'var(--text-color)' },
-        paper_bgcolor: 'var(--card-bg)',
-        plot_bgcolor: 'var(--card-bg)'
-      });
-      console.log("3D Surface Chart Shown!");
     }
   </script>
 </body>
