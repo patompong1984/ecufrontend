@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <title>ECU Map Viewer</title>
+  <title>ECU Map Analyzer</title>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; background-color: #f6f6f6; }
@@ -16,18 +16,29 @@
   <form id="uploadForm">
     <label for="mapType">เลือกแผนที่:</label>
     <select id="mapType" onchange="showGlossary(this.value)">
-      <option value="fuel">Limit IQ (Fuel Map)</option>
-      <option value="fuel_quantity">Injector Quantity</option>
-      <option value="injection_timing">Injector Timing</option>
-      <option value="boost_pressure">Boost Pressure</option>
-      <option value="rail_pressure">Rail Pressure (Limit CRP)</option>
-      <option value="torque_limiter">Limit Torque</option>
-      <option value="drivers_wish">Torque TPS (Driver’s Wish)</option>
-      <option value="turbo_duty">Turbo Duty Cycle</option>
-      <option value="smoke_limiter">Smoke Limiter</option>
-      <option value="iat_ect_correction">IAT & ECT Correction</option>
-      <option value="egr">EGR Target</option>
-      <option value="throttle">Throttle Valve</option>
+      <option value="limit_iq_1">Limit IQ #1</option>
+      <option value="limit_iq_2">Limit IQ #2</option>
+      <option value="limit_iq_3">Limit IQ #3</option>
+      <option value="torque_tps_1">Torque TPS #1</option>
+      <option value="torque_tps_2">Torque TPS #2</option>
+      <option value="torque_tps_3">Torque TPS #3</option>
+      <option value="egr_target">EGR Target</option>
+      <option value="pump_command">Pump Command</option>
+      <option value="injector_1">Injector #1</option>
+      <option value="injector_2">Injector #2</option>
+      <option value="limit_baro_1">Limit BARO 1</option>
+      <option value="limit_baro_2">Limit BARO 2</option>
+      <option value="limit_baro_3">Limit BARO 3</option>
+      <option value="limit_torque">Limit Torque</option>
+      <option value="torque_gear">Torque Gear</option>
+      <option value="limit_crp">Limit CRP</option>
+      <option value="green_1">Green Zone #1</option>
+      <option value="green_2">Green Zone #2</option>
+      <option value="green_3">Green Zone #3</option>
+      <option value="green_4">Green Zone #4</option>
+      <option value="green_5">Green Zone #5</option>
+      <option value="turbo">Turbo Target</option>
+      <option value="turbo_meter">Turbo Meter</option>
       <option value="dtc_off">DTC Table</option>
     </select>
     <br>
@@ -38,60 +49,50 @@
   <div id="glossary">คำอธิบายแผนที่จะปรากฏที่นี่</div>
   <div id="mapChart"></div>
   <script>
-const mapUnits = {
-  fuel: "mg/stroke",
-  fuel_quantity: "mg/stroke",
-  injection_timing: "° BTDC",
-  boost_pressure: "mbar",
-  rail_pressure: "bar",
-  torque_limiter: "%",
-  drivers_wish: "%",
-  turbo_duty: "%",
-  smoke_limiter: "mg/stroke",
-  iat_ect_correction: "%",
-  egr: "%",
-  throttle: "%",
-  dtc_off: ""
-};
-
 function showGlossary(type) {
   const glossary = {
-    fuel: "ควบคุมปริมาณการฉีดน้ำมันต่อรอบ (Limit IQ)",
-    fuel_quantity: "ปริมาณการฉีดน้ำมันจริงที่ ECU คำนวณ",
-    injection_timing: "เวลาการฉีดน้ำมันก่อนจุดศูนย์ (°BTDC)",
-    boost_pressure: "แรงดันอากาศที่เทอร์โบควบคุม (mbar)",
-    rail_pressure: "แรงดันน้ำมันในราง Fuel Rail (bar)",
-    torque_limiter: "จำกัดแรงบิดสูงสุดในแต่ละสภาวะ",
-    drivers_wish: "คำสั่งแรงบิดจากตำแหน่งคันเร่ง",
-    turbo_duty: "ระดับสั่งงานวาล์วเทอร์โบหรือ actuator (%)",
-    smoke_limiter: "จำกัดการฉีดเมื่อควันสูงเกินไป",
-    iat_ect_correction: "ปรับค่าตามอุณหภูมิ Intake และ Coolant",
-    egr: "กำหนดสัดส่วนหมุนเวียนไอเสีย",
-    throttle: "การเปิด/ปิดลิ้นปีกผีเสื้อตามการควบคุม",
-    dtc_off: "แผนที่ปิดการแจ้งเตือนระบบหรือ DTC"
+    limit_iq_1: "Limit IQ #1: ปริมาณเชื้อเพลิงต่อรอบที่ ECU จำกัดไว้",
+    limit_iq_2: "Limit IQ #2: แมพซ้ำสำหรับสถานการณ์ต่างกัน",
+    torque_tps_1: "Torque TPS #1: คำสั่งแรงบิดจากคันเร่ง",
+    injector_1: "Injector #1: คำสั่งจำนวนเชื้อเพลิงที่ฉีด",
+    limit_crp: "Rail Pressure: แรงดันน้ำมันในรางแรงดันสูง",
+    dtc_off: "DTC Table: ปิดการแจ้งเตือนรหัสผิดพลาด",
+    // เพิ่มคำอธิบายอื่น ๆ ได้ตามชื่อแมพ
   };
-  document.getElementById("glossary").innerText = glossary[type] || "";
+  document.getElementById("glossary").innerText = glossary[type] || "ไม่มีคำอธิบายสำหรับแผนที่นี้";
 }
 
 document.getElementById("uploadForm").addEventListener("submit", function (e) {
   e.preventDefault();
+
   const fileInput = document.getElementById("binFile");
   const mapType = document.getElementById("mapType").value;
   const file = fileInput.files[0];
-  if (!file) return alert("กรุณาเลือกไฟล์ .bin");
+  if (!file) return alert("❌ กรุณาเลือกไฟล์ .bin");
+
+  // เลือก format ตามแมพ (16bit สำหรับ limit_crp, green zone ฯลฯ)
+  const format = mapType.includes("crp") || mapType.includes("green") ? "default_16bit" : "default_8bit";
 
   const formData = new FormData();
   formData.append("bin", file);
   formData.append("type", mapType);
+  formData.append("format", format);
 
+  // ✅ เรียก backend ที่คุณ deploy บน Render
   fetch("https://ecu-backend-m07d.onrender.com/analyze", {
-  method: "POST",
-  body: formData
-})
+    method: "POST",
+    body: formData
+  })
   .then(res => res.json())
   .then(data => {
+    if (data.error) {
+      alert("❌ Backend error: " + data.error);
+      console.error("Error:", data.error);
+      return;
+    }
+
     if (!data.map || !Array.isArray(data.map)) {
-      alert("❌ ไม่พบข้อมูล map หรือรูปแบบผิดพลาด");
+      alert("❌ รูปแบบข้อมูลไม่ถูกต้อง");
       return;
     }
 
@@ -101,18 +102,18 @@ document.getElementById("uploadForm").addEventListener("submit", function (e) {
       y: data.y_axis,
       type: "surface",
       colorscale: "Jet",
-      hovertemplate: `LOAD: %{x}<br>RPM: %{y}<br>ค่า: %{z} ${data.unit}<extra></extra>`
+      hovertemplate: `LOAD: %{x}<br>RPM: %{y}<br>ค่า: %{z} ${data.unit || ""}<extra></extra>`
     }], {
-      title: `${data.display_name} (${data.unit})`,
+      title: `${data.type} (${data.unit || "?"})`,
       scene: {
         xaxis: { title: "LOAD" },
         yaxis: { title: "RPM" },
-        zaxis: { title: data.unit }
+        zaxis: { title: data.unit || "Value" }
       }
     });
   })
   .catch(err => {
-    console.error("Error:", err);
+    console.error("Fetch Error:", err);
     alert("เกิดข้อผิดพลาดในการวิเคราะห์ไฟล์");
   });
 });
