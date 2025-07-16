@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>ECU Map Viewer – Isuzu 1.9</title>
+  <style>
+    body { font-family: Arial; padding: 20px; background-color: #f0f0f0; }
+    #result { white-space: pre-wrap; background: #fff; padding: 10px; border: 1px solid #ccc; margin-top: 10px; }
+    input, button { margin-top: 10px; padding: 10px; font-size: 16px; }
+  </style>
+</head>
+<body>
+
+  <h2>🚗 Isuzu D-Max 1.9 ECU Viewer</h2>
+  
+  <input type="file" id="binFile" accept=".bin,.ori,.hex" />
+  <br/>
+  <button onclick="sendFile()">🔍 วิเคราะห์ไฟล์ ECU</button>
+  
+  <div id="result"></div>
+
+  <script>
+    async function sendFile() {
+      const input = document.getElementById('binFile');
+      const file = input.files[0];
+      if (!file) return alert("กรุณาเลือกไฟล์ก่อนครับ");
+
+      const formData = new FormData();
+      formData.append('bin', file);
+
+      const res = await fetch("https://ecu-backend-m07d.onrender.com/analyze", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await res.json();
+      document.getElementById("result").innerText = JSON.stringify(data.map, null, 2);
+    }
+  </script>
+
+</body>
+</html>
