@@ -2,277 +2,50 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ECU Map Viewer – Multi Maps</title>
-  <script src="https://cdn.plot.ly/plotly-2.20.0.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+  <title>ECU Map Viewer</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <style>
-    :root {
-      --primary-color: #007bff;
-      --secondary-color: #6c757d;
-      --success-color: #28a745;
-      --error-color: #dc3545;
-      --bg-light: #f8f9fa;
-      --bg-dark: #e9ecef;
-      --text-color: #343a40;
-      --border-color: #ced4da;
-      --card-bg: #ffffff;
-      --shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      --border-radius: 8px;
-    }
-
-    body {
-      font-family: 'Kanit', sans-serif;
-      padding: 15px;
-      background: var(--bg-light);
-      color: var(--text-color);
-      line-height: 1.6;
-      margin: 0;
-    }
-
-    h2 {
-      color: var(--primary-color);
-      text-align: center;
-      margin-bottom: 25px;
-      font-weight: 600;
-    }
-
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 20px;
-      background: var(--card-bg);
-      border-radius: var(--border-radius);
-      box-shadow: var(--shadow);
-    }
-
-    .input-group {
-      margin-bottom: 15px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 400;
-      color: var(--secondary-color);
-    }
-
-    input[type="file"],
-    select,
-    button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 5px;
-      border: 1px solid var(--border-color);
-      border-radius: var(--border-radius);
-      font-size: 16px;
-      box-sizing: border-box; /* Ensures padding doesn't increase total width */
-    }
-
-    button {
-      background-color: var(--primary-color);
-      color: white;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      font-weight: 400;
-      margin-top: 20px;
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    #glossary {
-      margin-top: 10px;
-      font-style: italic;
-      color: var(--secondary-color);
-      background-color: var(--bg-dark);
-      padding: 10px;
-      border-radius: var(--border-radius);
-      font-size: 0.9em;
-    }
-
-    .section-title {
-      margin-top: 25px;
-      margin-bottom: 15px;
-      color: var(--primary-color);
-      font-weight: 600;
-      border-bottom: 2px solid var(--primary-color);
-      padding-bottom: 5px;
-    }
-
-    .log-container, .result-container, .chart-container, .editor-container {
-      margin-top: 20px;
-      padding: 15px;
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: var(--border-radius);
-      box-shadow: var(--shadow);
-      overflow-x: auto; /* For table and pre-wrap content */
-    }
-
-    #log, #result {
-      white-space: pre-wrap;
-      word-break: break-word; /* For long texts */
-      min-height: 50px;
-    }
-
-    .log-success { color: var(--success-color); }
-    .log-error { color: var(--error-color); }
-    .log-step { color: var(--text-color); }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-
-    td {
-      padding: 4px;
-      border: 1px solid #ddd;
-      text-align: center;
-    }
-
-    input[type="number"] {
-      width: 60px;
-      padding: 5px;
-      font-size: 14px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      text-align: center;
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-      body {
-        padding: 10px;
-      }
-      .container {
-        padding: 15px;
-      }
-      input[type="file"], select, button {
-        font-size: 14px;
-        padding: 10px;
-      }
-      h2 {
-        font-size: 1.8em;
-      }
-      .section-title {
-        font-size: 1.2em;
-      }
-      input[type="number"] {
-        width: 45px;
-        font-size: 12px;
-        padding: 3px;
-      }
-      td {
-        padding: 2px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      h2 {
-        font-size: 1.5em;
-      }
-      label {
-        font-size: 0.9em;
-      }
-      #glossary {
-        font-size: 0.8em;
-        padding: 8px;
-      }
-      input[type="number"] {
-        width: 35px;
-        font-size: 10px;
-      }
-    }
-    .chart-controls {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 15px;
-      margin-bottom: 10px;
-    }
+    body { font-family: Arial, sans-serif; padding: 20px; background-color: #f6f6f6; }
+    #mapChart { margin-top: 30px; }
+    select, input, button { margin: 5px 0; padding: 8px; font-size: 16px; }
+    #glossary { margin-top: 10px; font-style: italic; color: #555; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>🚗 ECU Map Viewer – Isuzu D-Max 1.9L</h2>
+  <h2>ECU Map Analyzer</h2>
+  <form id="uploadForm">
+    <label for="mapType">เลือกแผนที่:</label>
+    <select id="mapType" onchange="showGlossary(this.value)">
+      <option value="fuel">Limit IQ (Fuel Map)</option>
+      <option value="fuel_quantity">Injector Quantity</option>
+      <option value="injection_timing">Injector Timing</option>
+      <option value="boost_pressure">Boost Pressure</option>
+      <option value="rail_pressure">Rail Pressure (Limit CRP)</option>
+      <option value="torque_limiter">Limit Torque</option>
+      <option value="drivers_wish">Torque TPS (Driver’s Wish)</option>
+      <option value="turbo_duty">Turbo Duty Cycle</option>
+      <option value="smoke_limiter">Smoke Limiter</option>
+      <option value="iat_ect_correction">IAT & ECT Correction</option>
+      <option value="egr">EGR Target</option>
+      <option value="throttle">Throttle Valve</option>
+      <option value="dtc_off">DTC Table</option>
+    </select>
+    <br>
+    <input type="file" id="binFile" accept=".bin" required />
+    <button type="submit">วิเคราะห์แผนที่</button>
+  </form>
 
-    <div class="input-group">
-      <label for="binFile">เลือกไฟล์ .BIN / .ORI / .HEX:</label>
-      <input type="file" id="binFile" accept=".bin,.ori,.hex">
-    </div>
-
-    <div class="input-group">
-      <label for="mapType">🗂️ ประเภท Map:</label>
-      <select id="mapType" onchange="showGlossary(this.value)">
-  <option value="fuel">Limit IQ (Fuel Map)</option>
-  <option value="torque_limiter">Limit Torque</option>
-  <option value="drivers_wish">Torque TPS (Driver’s Wish)</option>
-  <option value="fuel_quantity">Injector Quantity</option>
-  <option value="injection_timing">Injector Timing</option>
-  <option value="boost_pressure">Boost Pressure</option>
-  <option value="rail_pressure">Rail Pressure (Limit CRP)</option>
-  <option value="turbo_duty">Turbo Duty Cycle</option>
-  <option value="smoke_limiter">Smoke Limiter</option>
-  <option value="iat_ect_correction">IAT & ECT Correction</option>
-  <option value="egr">EGR Target</option>
-  <option value="throttle">Throttle Valve</option>
-  <option value="dtc_off">DTC Off Table</option>
-</select>
-    </div>
-
-    <div id="glossary"></div>
-    <button onclick="sendFile()">🔍 วิเคราะห์ ECU Map</button>
-
-    <div class="log-container">
-      <h3 class="section-title">📋 Log:</h3>
-      <div id="log"></div>
-    </div>
-
-    <div class="result-container">
-      <h3 class="section-title">🧾 ผลลัพธ์ JSON:</h3>
-      <div id="result"></div>
-    </div>
-
-    <div class="chart-container">
-      <h3 class="section-title">📈 กราฟ ECU Map:</h3>
-      <div class="chart-controls">
-        <button onclick="updateChartDisplay('heatmap')">📊 แสดงกราฟ 2D (Heatmap)</button>
-        <button onclick="updateChartDisplay('surface')">🏞️ แสดงกราฟ 3D (Surface)</button>
-      </div>
-      <div id="mapChart"></div>
-    </div>
-
-    <div class="editor-container">
-      <h3 class="section-title">📝 แก้ไขค่า Map:</h3>
-      <div id="editor"></div>
-      <button onclick="updateChart()">🔄 อัปเดตกราฟหลังแก้ไข</button>
-    </div>
-     <button onclick="exportCSV()">💾 ดาวน์โหลด CSV</button>
-  </div>
-
+  <div id="glossary">คำอธิบายแผนที่จะปรากฏที่นี่</div>
+  <div id="mapChart"></div>
   <script>
-    let currentMap = [], xAxis = [], yAxis = [], currentMapType = '';
-    let currentChartType = 'heatmap'; // Default chart type
-
-    // Initial glossary load
-    document.addEventListener('DOMContentLoaded', () => {
-      showGlossary(document.getElementById('mapType').value);
-      document.getElementById('log').innerText = "📋 Log: ระบบพร้อมใช้งาน";
-      document.getElementById('result').innerText = "🧾 ผลลัพธ์จะแสดงที่นี่";
-    });
-
-    // หน่วยสำหรับแต่ละ Map
-    const mapUnits = {
+const mapUnits = {
   fuel: "mg/stroke",
-  torque_limiter: "%",
-  drivers_wish: "%",
   fuel_quantity: "mg/stroke",
   injection_timing: "° BTDC",
   boost_pressure: "mbar",
   rail_pressure: "bar",
+  torque_limiter: "%",
+  drivers_wish: "%",
   turbo_duty: "%",
   smoke_limiter: "mg/stroke",
   iat_ect_correction: "%",
@@ -281,204 +54,68 @@
   dtc_off: ""
 };
 
-    async function sendFile() {
-      const file = document.getElementById("binFile").files[0];
-      const mapType = document.getElementById("mapType").value;
-      const logDiv = document.getElementById("log");
-      const resultDiv = document.getElementById("result");
-      const chartDiv = document.getElementById("mapChart");
-      const editorDiv = document.getElementById("editor");
-
-      logDiv.innerHTML = ""; // Clear previous logs
-      resultDiv.innerText = "🧾 กำลังวิเคราะห์...";
-      chartDiv.innerHTML = "";
-      editorDiv.innerHTML = "";
-
-      if (!file) {
-        log("❌ กรุณาเลือกไฟล์ .BIN", "error");
-        resultDiv.innerText = "🧾 ผลลัพธ์ JSON:";
-        return;
-      }
-
-      log(`📤 กำลังส่งไฟล์ ${file.name} เพื่อวิเคราะห์ Map: '${mapType}'...`, "step");
-
-      const formData = new FormData();
-      formData.append('bin', file);
-      formData.append('type', mapType);
-
-      try {
-        const res = await fetch("https://ecu-backend-m07d.onrender.com/analyze", {
-          method: "POST",
-          body: formData
-        });
-
-        if (!res.ok) {
-          const errorText = await res.text();
-          throw new Error(`เชื่อมต่อ Backend ไม่สำเร็จ: ${res.status} ${res.statusText} - ${errorText}`);
-        }
-
-        const data = await res.json();
-        currentMap = data.map;
-        xAxis = data.x_axis;
-        yAxis = data.y_axis;
-        currentMapType = data.type; // เก็บ mapType ปัจจุบันไว้
-
-        resultDiv.innerText = `✅ วิเคราะห์สำเร็จ: ${data.type} Map (Offset: ${data.offset})\n\n` + JSON.stringify(currentMap, null, 2);
-
-        // วาดกราฟเริ่มต้นเป็น 2D (heatmap) เสมอ
-        plotMap(currentMap, xAxis, yAxis, currentMapType, 'heatmap', data.offset);
-        log("📊 วาดกราฟสำเร็จแล้ว", "success");
-        renderEditor(currentMap);
-
-      } catch (error) {
-        resultDiv.innerText = "❌ เกิดข้อผิดพลาด: " + error.message;
-        log("🔥 " + error.message, "error");
-      }
-
-      function log(msg, type) {
-        const div = document.createElement("div");
-        div.innerText = msg;
-        div.className = "log-" + type;
-        logDiv.appendChild(div);
-        logDiv.scrollTop = logDiv.scrollHeight; // Scroll to bottom
-      }
-    }
-
-    // ฟังก์ชันใหม่สำหรับวาดกราฟ (รวม 2D และ 3D)
-    function plotMap(mapData, xData, yData, mapType, chartType, offset = null) {
-      const chartDiv = document.getElementById("mapChart");
-      const unit = mapUnits[data.type] || "";
-      const hover = `<b>LOAD:</b> %{x}<br><b>RPM:</b> %{y}<br><b>ค่า:</b> %{z} ${unit}<extra></extra>`;
-
-title: `${data.type.toUpperCase()} (${unit}) – Offset ${data.offset}`
-      let plotData = [{
-        z: mapData,
-        x: xData,
-        y: yData,
-        type: chartType, // ใช้ chartType ที่ส่งมา ('heatmap' หรือ 'surface')
-        colorscale: 'Jet',
-        hoverongaps: false
-      }];
-
-      let layout;
-
-      if (chartType === 'heatmap') {
-        plotData[0].hovertemplate = hoverTemplate; // Heatmap ใช้ hovertemplate
-        layout = {
-          title: `${mapType.toUpperCase()} Map (${unit})` + (offset ? ` – Offset ${offset}` : ''),
-          autosize: true,
-          margin: { t: 60, l: 60, r: 30, b: 40 },
-          xaxis: { title: "โหลด (%)", tickfont: { size: 12 } },
-          yaxis: { title: "รอบเครื่อง (RPM)", tickfont: { size: 12 } },
-          font: { family: "Kanit", size: 14, color: 'var(--text-color)' },
-          paper_bgcolor: 'var(--card-bg)',
-          plot_bgcolor: 'var(--card-bg)'
-        };
-      } else if (chartType === 'surface') {
-        // Surface plot doesn't use hovertemplate in the same way, but can configure scene.
-        layout = {
-          title: `🌄 3D Surface Preview - ${mapType.toUpperCase()} Map (${unit})` + (offset ? ` – Offset ${offset}` : ''),
-          autosize: true,
-          margin: { t: 60, l: 60, r: 30, b: 40 },
-          scene: {
-            xaxis: { title: "โหลด (%)" },
-            yaxis: { title: "รอบเครื่อง (RPM)" },
-            zaxis: { title: `ค่า (${unit})` }
-          },
-          font: { family: "Kanit", size: 14, color: 'var(--text-color)' },
-          paper_bgcolor: 'var(--card-bg)',
-          plot_bgcolor: 'var(--card-bg)'
-        };
-      }
-      
-      Plotly.newPlot(chartDiv, plotData, layout, { responsive: true });
-      currentChartType = chartType; // Update current chart type
-    }
-
-
-    function renderEditor(map) {
-      const editorDiv = document.getElementById("editor");
-      let tableHtml = "<table border='1'>";
-      map.forEach((row, i) => {
-        tableHtml += "<tr>";
-        row.map((val, j) => {
-          tableHtml += `<td><input type="number" step="0.01" value="${val}" data-i="${i}" data-j="${j}"></td>`;
-        }).join("");
-        tableHtml += "</tr>";
-      });
-      tableHtml += "</table>";
-      editorDiv.innerHTML = tableHtml;
-    }
-
-    function updateChart() {
-      const inputs = document.querySelectorAll("#editor input");
-      const updatedMap = Array.from({ length: 16 }, () => Array(16).fill(0));
-      inputs.forEach(input => {
-        const i = +input.dataset.i;
-        const j = +input.dataset.j;
-        updatedMap[i][j] = parseFloat(input.value) || 0;
-      });
-
-      currentMap = updatedMap; // Update currentMap with edited values
-
-      // วาดกราฟใหม่ด้วยค่าที่แก้ไขและประเภทกราฟปัจจุบัน
-      plotMap(currentMap, xAxis, yAxis, currentMapType, currentChartType);
-
-      document.getElementById("result").innerText = "🛠 Map ถูกแก้ไขแล้ว:\n\n" + JSON.stringify(updatedMap, null, 2);
-      document.getElementById("log").appendChild(document.createElement("div")).className = "log-success";
-      document.getElementById("log").lastChild.innerText = "✅ กราฟและข้อมูลอัปเดตเรียบร้อย!";
-    }
-
-    // ฟังก์ชันสำหรับเปลี่ยนประเภทกราฟ
-    function updateChartDisplay(chartType) {
-        if (!currentMap || currentMap.length === 0) {
-            alert("กรุณาวิเคราะห์ Map ก่อนแสดงกราฟ");
-            return;
-        }
-        plotMap(currentMap, xAxis, yAxis, currentMapType, chartType);
-        console.log(`Switched to ${chartType} chart.`);
-    }
-
-    function showGlossary(type) {
+function showGlossary(type) {
   const glossary = {
-    fuel: "ควบคุมปริมาณการฉีดน้ำมันในแต่ละรอบ (Limit IQ)",
-    torque_limiter: "จำกัดแรงบิดสูงสุดในแต่ละสภาวะ (Limit Torque)",
-    drivers_wish: "คำสั่งแรงบิดตามตำแหน่งคันเร่ง (Torque TPS)",
-    fuel_quantity: "ปริมาณน้ำมันจริงที่ ECU คำนวณฉีด",
+    fuel: "ควบคุมปริมาณการฉีดน้ำมันต่อรอบ (Limit IQ)",
+    fuel_quantity: "ปริมาณการฉีดน้ำมันจริงที่ ECU คำนวณ",
     injection_timing: "เวลาการฉีดน้ำมันก่อนจุดศูนย์ (°BTDC)",
-    boost_pressure: "แรงดันอากาศที่เทอร์โบควบคุม",
-    rail_pressure: "แรงดันน้ำมันในราง common rail (Limit CRP)",
-    turbo_duty: "ระดับสั่งงานวาล์วเทอร์โบหรือ actuator",
-    smoke_limiter: "จำกัดการฉีดเมื่อควันเกินค่า",
-    iat_ect_correction: "ปรับตามอุณหภูมิไอดีและน้ำหล่อเย็น",
-    egr: "กำหนดสัดส่วนหมุนเวียนไอเสีย (EGR Target)",
+    boost_pressure: "แรงดันอากาศที่เทอร์โบควบคุม (mbar)",
+    rail_pressure: "แรงดันน้ำมันในราง Fuel Rail (bar)",
+    torque_limiter: "จำกัดแรงบิดสูงสุดในแต่ละสภาวะ",
+    drivers_wish: "คำสั่งแรงบิดจากตำแหน่งคันเร่ง",
+    turbo_duty: "ระดับสั่งงานวาล์วเทอร์โบหรือ actuator (%)",
+    smoke_limiter: "จำกัดการฉีดเมื่อควันสูงเกินไป",
+    iat_ect_correction: "ปรับค่าตามอุณหภูมิ Intake และ Coolant",
+    egr: "กำหนดสัดส่วนหมุนเวียนไอเสีย",
     throttle: "การเปิด/ปิดลิ้นปีกผีเสื้อตามการควบคุม",
-    dtc_off: "แผนที่ปิดไฟแจ้งเตือนระบบหรือรหัสผิดพลาด"
+    dtc_off: "แผนที่ปิดการแจ้งเตือนระบบหรือ DTC"
   };
   document.getElementById("glossary").innerText = glossary[type] || "";
 }
-    
-    function exportCSV() {
-      if (!currentMap || currentMap.length === 0) {
-          alert("กรุณาวิเคราะห์ Map ก่อนดาวน์โหลด CSV");
-          return;
-      }
 
-      let csv = "RPM/Load," + xAxis.join(",") + "\n";
-      currentMap.forEach((row, i) => {
-        csv += yAxis[i] + "," + row.join(",") + "\n";
-      });
+document.getElementById("uploadForm").addEventListener("submit", function (e) {
+  e.preventDefault();
+  const fileInput = document.getElementById("binFile");
+  const mapType = document.getElementById("mapType").value;
+  const file = fileInput.files[0];
+  if (!file) return alert("กรุณาเลือกไฟล์ .bin");
 
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.setAttribute("href", url);
-      link.setAttribute("download", `${currentMapType}_map_export.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      console.log("CSV Exported!");
+  const formData = new FormData();
+  formData.append("bin", file);
+  formData.append("type", mapType);
+
+  fetch("/analyze", {
+    method: "POST",
+    body: formData
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (!data.map || !Array.isArray(data.map)) {
+      alert("❌ ไม่พบข้อมูล map หรือรูปแบบผิดพลาด");
+      return;
     }
-  </script>
+
+    Plotly.newPlot("mapChart", [{
+      z: data.map,
+      x: data.x_axis,
+      y: data.y_axis,
+      type: "surface",
+      colorscale: "Jet",
+      hovertemplate: `LOAD: %{x}<br>RPM: %{y}<br>ค่า: %{z} ${data.unit}<extra></extra>`
+    }], {
+      title: `${data.display_name} (${data.unit})`,
+      scene: {
+        xaxis: { title: "LOAD" },
+        yaxis: { title: "RPM" },
+        zaxis: { title: data.unit }
+      }
+    });
+  })
+  .catch(err => {
+    console.error("Error:", err);
+    alert("เกิดข้อผิดพลาดในการวิเคราะห์ไฟล์");
+  });
+});
+</script>
 </body>
 </html>
