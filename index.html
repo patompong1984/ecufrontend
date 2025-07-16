@@ -266,20 +266,20 @@
 
     // หน่วยสำหรับแต่ละ Map
     const mapUnits = {
-        fuel: "mg/stroke",
-        fuel_quantity: "mg/stroke",
-        injection_timing: "° BTDC",
-        boost_pressure: "mbar",
-        rail_pressure: "bar",
-        torque_limiter: "%",
-        drivers_wish: "%",
-        turbo_duty: "%",
-        smoke_limiter: "mg/stroke",
-        iat_ect_correction: "%",
-        egr: "%",
-        throttle: "%",
-        dtc_off: ""
-    };
+  fuel: "mg/stroke",
+  torque_limiter: "%",
+  drivers_wish: "%",
+  fuel_quantity: "mg/stroke",
+  injection_timing: "° BTDC",
+  boost_pressure: "mbar",
+  rail_pressure: "bar",
+  turbo_duty: "%",
+  smoke_limiter: "mg/stroke",
+  iat_ect_correction: "%",
+  egr: "%",
+  throttle: "%",
+  dtc_off: ""
+};
 
     async function sendFile() {
       const file = document.getElementById("binFile").files[0];
