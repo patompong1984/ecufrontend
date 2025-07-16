@@ -2,25 +2,17 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>ECU Map Viewer – Isuzu 1.9</title>
+  <title>ECU Map Viewer – Multi Maps</title>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <style>
-    body {
-      font-family: Arial;
-      padding: 20px;
-      background-color: #f0f0f0;
-    }
-    #result, #mapChart, #log {
+    body { font-family: Arial; padding: 20px; background: #f0f0f0; }
+    input, select, button { margin-top: 10px; padding: 10px; font-size: 16px; }
+    #log, #result, #mapChart {
+      margin-top: 10px;
+      padding: 10px;
       background: #fff;
-      padding: 10px;
       border: 1px solid #ccc;
-      margin-top: 10px;
       white-space: pre-wrap;
-    }
-    input, button {
-      margin-top: 10px;
-      padding: 10px;
-      font-size: 16px;
     }
     .log-success { color: green; }
     .log-error { color: red; }
@@ -29,25 +21,32 @@
 </head>
 <body>
 
-  <h2>🚗 Isuzu D-Max 1.9 ECU Viewer</h2>
+  <h2>🚗 Isuzu D-Max 1.9 ECU Viewer (Multi-Map)</h2>
 
-  <input type="file" id="binFile" accept=".bin,.ori,.hex" />
-  <br/>
-  <button onclick="sendFile()">🔍 วิเคราะห์ไฟล์ ECU</button>
+  <input type="file" id="binFile" accept=".bin,.ori,.hex" /><br/>
+
+  <label>🗂️ ประเภท Map:</label>
+  <select id="mapType">
+    <option value="fuel">Fuel</option>
+    <option value="ignition">Ignition</option>
+    <option value="boost">Boost</option>
+  </select><br/>
+
+  <button onclick="sendFile()">🔍 วิเคราะห์ ECU Map</button>
 
   <div id="log">📋 Log ขั้นตอน:</div>
-  <div id="result">🧾 ผลลัพธ์ JSON: ยังไม่มีข้อมูล</div>
+  <div id="result">🧾 ผลลัพธ์ JSON:</div>
   <div id="mapChart"></div>
 
   <script>
     async function sendFile() {
-      const input = document.getElementById('binFile');
-      const file = input.files[0];
+      const fileInput = document.getElementById("binFile");
+      const mapType = document.getElementById("mapType").value;
+      const file = fileInput.files[0];
       const logDiv = document.getElementById("log");
       const resultDiv = document.getElementById("result");
       const chartDiv = document.getElementById("mapChart");
 
-      // Reset
       logDiv.innerHTML = "📋 Log ขั้นตอน:\n";
       resultDiv.innerText = "🧾 กำลังวิเคราะห์...";
       chartDiv.innerHTML = "";
@@ -58,49 +57,46 @@
         return;
       }
 
-      log("📤 เตรียมส่งไฟล์: " + file.name, "step");
+      log(`📤 เตรียมส่งไฟล์ ${file.name} ด้วยประเภท '${mapType}'`, "step");
 
       const formData = new FormData();
       formData.append('bin', file);
+      formData.append('type', mapType);
 
       try {
-        log("🚀 กำลังส่งไปยัง backend...", "step");
+        log("🚀 ส่งไปยัง backend...", "step");
 
         const res = await fetch("https://ecu-backend-m07d.onrender.com/analyze", {
           method: "POST",
           body: formData
         });
 
-        if (!res.ok) {
-          throw new Error("เซิร์ฟเวอร์ไม่ตอบกลับ (" + res.status + ")");
-        }
-
-        log("✅ backend ตอบกลับแล้ว", "success");
+        if (!res.ok) throw new Error("เซิร์ฟเวอร์ไม่ตอบกลับ: " + res.status);
 
         const data = await res.json();
+        log("✅ backend ตอบกลับเรียบร้อย", "success");
 
-        resultDiv.innerText = "🧾 วิเคราะห์สำเร็จ:\n\n" + JSON.stringify(data.map, null, 2);
-        log("📊 สร้างกราฟ 2D จากข้อมูล", "step");
+        resultDiv.innerText = `✅ วิเคราะห์สำเร็จ: ${data.type} Map\n\n` + JSON.stringify(data.map, null, 2);
 
         Plotly.newPlot(chartDiv, [{
           z: data.map,
           type: 'heatmap',
           colorscale: 'YlGnBu'
         }], {
-          title: 'Fuel Map – Isuzu D-Max 1.9',
+          title: `${data.type} Map – Offset ${data.offset}`,
           margin: { t: 40 }
         });
 
-        log("✅ วาดกราฟสำเร็จ", "success");
+        log("📊 วาดกราฟสำเร็จ", "success");
 
       } catch (error) {
         resultDiv.innerText = "❌ เกิดข้อผิดพลาด: " + error.message;
         log("🔥 Error: " + error.message, "error");
       }
 
-      function log(message, type) {
+      function log(msg, type) {
         const span = document.createElement("div");
-        span.innerText = message;
+        span.innerText = msg;
         span.className = "log-" + type;
         logDiv.appendChild(span);
       }
