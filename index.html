@@ -347,9 +347,10 @@
     // ฟังก์ชันใหม่สำหรับวาดกราฟ (รวม 2D และ 3D)
     function plotMap(mapData, xData, yData, mapType, chartType, offset = null) {
       const chartDiv = document.getElementById("mapChart");
-      const unit = mapUnits[mapType] || "";
-      const hoverTemplate = `<b>โหลด:</b> %{x}<br><b>รอบเครื่อง:</b> %{y}<br><b>ค่า:</b> %{z} ${unit}<extra></extra>`;
+      const unit = mapUnits[data.type] || "";
+      const hover = `<b>LOAD:</b> %{x}<br><b>RPM:</b> %{y}<br><b>ค่า:</b> %{z} ${unit}<extra></extra>`;
 
+title: `${data.type.toUpperCase()} (${unit}) – Offset ${data.offset}`
       let plotData = [{
         z: mapData,
         x: xData,
