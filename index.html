@@ -23,33 +23,35 @@
     async function sendFile() {
       const input = document.getElementById('binFile');
       const file = input.files[0];
-      if (!file) return alert("กรุณาเลือกไฟล์ก่อนครับ");
+      const resultDiv = document.getElementById("result");
+
+      if (!file) {
+        alert("กรุณาเลือกไฟล์ก่อนครับ");
+        return;
+      }
+
+      resultDiv.innerText = "กำลังวิเคราะห์ไฟล์...";
 
       const formData = new FormData();
       formData.append('bin', file);
 
-      const res = await fetch("https://ecu-backend-m07d.onrender.com/analyze", {
-        method: "POST",
-        body: formData
-      });
+      try {
+        const res = await fetch("https://ecu-backend-m07d.onrender.com/analyze", {
+          method: "POST",
+          body: formData
+        });
 
-      const data = await res.json();
-      document.getElementById("result").innerText = JSON.stringify(data.map, null, 2);
+        if (!res.ok) {
+          throw new Error("เซิร์ฟเวอร์ไม่ตอบกลับ (" + res.status + ")");
+        }
+
+        const data = await res.json();
+        resultDiv.innerText = JSON.stringify(data.map, null, 2);
+      } catch (error) {
+        resultDiv.innerText = "เกิดข้อผิดพลาด: " + error.message;
+        console.error("Error:", error);
+      }
     }
-    document.getElementById("result").innerText = "กำลังวิเคราะห์ไฟล์...";
-
-try {
-  const res = await fetch("https://ecu-backend-m07d.onrender.com/analyze", {
-    method: "POST",
-    body: formData
-  });
-
-  const data = await res.json();
-  document.getElementById("result").innerText = JSON.stringify(data.map, null, 2);
-} catch (error) {
-  document.getElementById("result").innerText = "เกิดข้อผิดพลาด: " + error;
-  console.error("Error:", error);
-}
   </script>
 
 </body>
