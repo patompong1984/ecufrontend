@@ -3,39 +3,69 @@
 <head>
   <meta charset="UTF-8">
   <title>ECU Map Viewer – Isuzu 1.9</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <style>
-    body { font-family: Arial; padding: 20px; background-color: #f0f0f0; }
-    #result { white-space: pre-wrap; background: #fff; padding: 10px; border: 1px solid #ccc; margin-top: 10px; }
-    input, button { margin-top: 10px; padding: 10px; font-size: 16px; }
+    body {
+      font-family: Arial;
+      padding: 20px;
+      background-color: #f0f0f0;
+    }
+    #result, #mapChart, #log {
+      background: #fff;
+      padding: 10px;
+      border: 1px solid #ccc;
+      margin-top: 10px;
+      white-space: pre-wrap;
+    }
+    input, button {
+      margin-top: 10px;
+      padding: 10px;
+      font-size: 16px;
+    }
+    .log-success { color: green; }
+    .log-error { color: red; }
+    .log-step { color: #333; }
   </style>
 </head>
 <body>
 
   <h2>🚗 Isuzu D-Max 1.9 ECU Viewer</h2>
-  
+
   <input type="file" id="binFile" accept=".bin,.ori,.hex" />
   <br/>
   <button onclick="sendFile()">🔍 วิเคราะห์ไฟล์ ECU</button>
-  
-  <div id="result"></div>
+
+  <div id="log">📋 Log ขั้นตอน:</div>
+  <div id="result">🧾 ผลลัพธ์ JSON: ยังไม่มีข้อมูล</div>
+  <div id="mapChart"></div>
 
   <script>
     async function sendFile() {
       const input = document.getElementById('binFile');
       const file = input.files[0];
+      const logDiv = document.getElementById("log");
       const resultDiv = document.getElementById("result");
+      const chartDiv = document.getElementById("mapChart");
+
+      // Reset
+      logDiv.innerHTML = "📋 Log ขั้นตอน:\n";
+      resultDiv.innerText = "🧾 กำลังวิเคราะห์...";
+      chartDiv.innerHTML = "";
 
       if (!file) {
+        log("❌ ยังไม่ได้เลือกไฟล์", "error");
         alert("กรุณาเลือกไฟล์ก่อนครับ");
         return;
       }
 
-      resultDiv.innerText = "กำลังวิเคราะห์ไฟล์...";
+      log("📤 เตรียมส่งไฟล์: " + file.name, "step");
 
       const formData = new FormData();
       formData.append('bin', file);
 
       try {
+        log("🚀 กำลังส่งไปยัง backend...", "step");
+
         const res = await fetch("https://ecu-backend-m07d.onrender.com/analyze", {
           method: "POST",
           body: formData
@@ -45,11 +75,34 @@
           throw new Error("เซิร์ฟเวอร์ไม่ตอบกลับ (" + res.status + ")");
         }
 
+        log("✅ backend ตอบกลับแล้ว", "success");
+
         const data = await res.json();
-        resultDiv.innerText = JSON.stringify(data.map, null, 2);
+
+        resultDiv.innerText = "🧾 วิเคราะห์สำเร็จ:\n\n" + JSON.stringify(data.map, null, 2);
+        log("📊 สร้างกราฟ 2D จากข้อมูล", "step");
+
+        Plotly.newPlot(chartDiv, [{
+          z: data.map,
+          type: 'heatmap',
+          colorscale: 'YlGnBu'
+        }], {
+          title: 'Fuel Map – Isuzu D-Max 1.9',
+          margin: { t: 40 }
+        });
+
+        log("✅ วาดกราฟสำเร็จ", "success");
+
       } catch (error) {
-        resultDiv.innerText = "เกิดข้อผิดพลาด: " + error.message;
-        console.error("Error:", error);
+        resultDiv.innerText = "❌ เกิดข้อผิดพลาด: " + error.message;
+        log("🔥 Error: " + error.message, "error");
+      }
+
+      function log(message, type) {
+        const span = document.createElement("div");
+        span.innerText = message;
+        span.className = "log-" + type;
+        logDiv.appendChild(span);
       }
     }
   </script>
