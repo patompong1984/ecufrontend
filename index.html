@@ -1,12 +1,20 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
 <head>
   <meta charset="UTF-8">
   <title>ECU Map Viewer – Multi Maps</title>
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.20.0.min.js"></script>
   <style>
-    body { font-family: Arial; padding: 20px; background: #f0f0f0; }
-    input, select, button { margin-top: 10px; padding: 10px; font-size: 16px; }
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f0f0f0;
+    }
+    input, select, button {
+      margin-top: 10px;
+      padding: 10px;
+      font-size: 16px;
+    }
     #log, #result, #mapChart {
       margin-top: 10px;
       padding: 10px;
@@ -23,14 +31,14 @@
 
   <h2>🚗 Isuzu D-Max 1.9 ECU Viewer (Multi-Map)</h2>
 
-  <input type="file" id="binFile" accept=".bin,.ori,.hex" /><br/>
+  <input type="file" id="binFile" accept=".bin,.ori,.hex"><br>
 
   <label>🗂️ ประเภท Map:</label>
   <select id="mapType">
     <option value="fuel">Fuel</option>
     <option value="ignition">Ignition</option>
     <option value="boost">Boost</option>
-  </select><br/>
+  </select><br>
 
   <button onclick="sendFile()">🔍 วิเคราะห์ ECU Map</button>
 
