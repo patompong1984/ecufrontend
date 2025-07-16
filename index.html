@@ -207,20 +207,20 @@
     <div class="input-group">
       <label for="mapType">🗂️ ประเภท Map:</label>
       <select id="mapType" onchange="showGlossary(this.value)">
-        <option value="fuel">Fuel</option>
-        <option value="torque_limiter">Torque Limiter</option>
-        <option value="drivers_wish">Drivers Wish</option>
-        <option value="fuel_quantity">Fuel Quantity</option>
-        <option value="injection_timing">Injection Timing</option>
-        <option value="boost_pressure">Boost Pressure</option>
-        <option value="rail_pressure">Rail Pressure</option>
-        <option value="turbo_duty">Turbo Duty</option>
-        <option value="smoke_limiter">Smoke Limiter</option>
-        <option value="iat_ect_correction">IAT & ECT Correction</option>
-        <option value="egr">EGR</option>
-        <option value="throttle">Throttle</option>
-        <option value="dtc_off">DTC Off</option>
-      </select>
+  <option value="fuel">Limit IQ (Fuel Map)</option>
+  <option value="torque_limiter">Limit Torque</option>
+  <option value="drivers_wish">Torque TPS (Driver’s Wish)</option>
+  <option value="fuel_quantity">Injector Quantity</option>
+  <option value="injection_timing">Injector Timing</option>
+  <option value="boost_pressure">Boost Pressure</option>
+  <option value="rail_pressure">Rail Pressure (Limit CRP)</option>
+  <option value="turbo_duty">Turbo Duty Cycle</option>
+  <option value="smoke_limiter">Smoke Limiter</option>
+  <option value="iat_ect_correction">IAT & ECT Correction</option>
+  <option value="egr">EGR Target</option>
+  <option value="throttle">Throttle Valve</option>
+  <option value="dtc_off">DTC Off Table</option>
+</select>
     </div>
 
     <div id="glossary"></div>
