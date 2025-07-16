@@ -2,69 +2,255 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ECU Map Viewer – Multi Maps</title>
   <script src="https://cdn.plot.ly/plotly-2.20.0.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --primary-color: #007bff;
+      --secondary-color: #6c757d;
+      --success-color: #28a745;
+      --error-color: #dc3545;
+      --bg-light: #f8f9fa;
+      --bg-dark: #e9ecef;
+      --text-color: #343a40;
+      --border-color: #ced4da;
+      --card-bg: #ffffff;
+      --shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      --border-radius: 8px;
+    }
+
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Kanit', sans-serif;
+      padding: 15px;
+      background: var(--bg-light);
+      color: var(--text-color);
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    h2 {
+      color: var(--primary-color);
+      text-align: center;
+      margin-bottom: 25px;
+      font-weight: 600;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
       padding: 20px;
-      background: #f0f0f0;
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
     }
-    input, select, button {
-      margin-top: 10px;
-      padding: 10px;
+
+    .input-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 400;
+      color: var(--secondary-color);
+    }
+
+    input[type="file"],
+    select,
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 5px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
       font-size: 16px;
+      box-sizing: border-box; /* Ensures padding doesn't increase total width */
     }
-    #log, #result, #mapChart, #editor {
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      font-weight: 400;
+      margin-top: 20px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #glossary {
       margin-top: 10px;
+      font-style: italic;
+      color: var(--secondary-color);
+      background-color: var(--bg-dark);
       padding: 10px;
-      background: #fff;
-      border: 1px solid #ccc;
-      white-space: pre-wrap;
+      border-radius: var(--border-radius);
+      font-size: 0.9em;
     }
-    .log-success { color: green; }
-    .log-error { color: red; }
-    .log-step { color: #333; }
-    table { border-collapse: collapse; }
-    td { padding: 2px; }
+
+    .section-title {
+      margin-top: 25px;
+      margin-bottom: 15px;
+      color: var(--primary-color);
+      font-weight: 600;
+      border-bottom: 2px solid var(--primary-color);
+      padding-bottom: 5px;
+    }
+
+    .log-container, .result-container, .chart-container, .editor-container {
+      margin-top: 20px;
+      padding: 15px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      overflow-x: auto; /* For table and pre-wrap content */
+    }
+
+    #log, #result {
+      white-space: pre-wrap;
+      word-break: break-word; /* For long texts */
+      min-height: 50px;
+    }
+
+    .log-success { color: var(--success-color); }
+    .log-error { color: var(--error-color); }
+    .log-step { color: var(--text-color); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    td {
+      padding: 4px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+
     input[type="number"] {
       width: 60px;
+      padding: 5px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      text-align: center;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+      .container {
+        padding: 15px;
+      }
+      input[type="file"], select, button {
+        font-size: 14px;
+        padding: 10px;
+      }
+      h2 {
+        font-size: 1.8em;
+      }
+      .section-title {
+        font-size: 1.2em;
+      }
+      input[type="number"] {
+        width: 45px;
+        font-size: 12px;
+        padding: 3px;
+      }
+      td {
+        padding: 2px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      h2 {
+        font-size: 1.5em;
+      }
+      label {
+        font-size: 0.9em;
+      }
+      #glossary {
+        font-size: 0.8em;
+        padding: 8px;
+      }
+      input[type="number"] {
+        width: 35px;
+        font-size: 10px;
+      }
     }
   </style>
 </head>
 <body>
 
-  <h2>🚗 ECU Map Viewer – Isuzu D-Max 1.9L</h2>
+  <div class="container">
+    <h2>🚗 ECU Map Viewer – Isuzu D-Max 1.9L</h2>
 
-  <input type="file" id="binFile" accept=".bin,.ori,.hex"><br>
+    <div class="input-group">
+      <label for="binFile">เลือกไฟล์ .BIN / .ORI / .HEX:</label>
+      <input type="file" id="binFile" accept=".bin,.ori,.hex">
+    </div>
 
-  <label>🗂️ ประเภท Map:</label>
-  <select id="mapType" onchange="showGlossary(this.value)">
-    <option value="fuel">Fuel</option>
-    <option value="torque_limiter">Torque Limiter</option>
-    <option value="drivers_wish">Drivers Wish</option>
-    <option value="fuel_quantity">Fuel Quantity</option>
-    <option value="injection_timing">Injection Timing</option>
-    <option value="boost_pressure">Boost Pressure</option>
-    <option value="rail_pressure">Rail Pressure</option>
-    <option value="turbo_duty">Turbo Duty</option>
-    <option value="smoke_limiter">Smoke Limiter</option>
-    <option value="iat_ect_correction">IAT & ECT Correction</option>
-    <option value="egr">EGR</option>
-    <option value="throttle">Throttle</option>
-    <option value="dtc_off">DTC Off</option>
-  </select>
+    <div class="input-group">
+      <label for="mapType">🗂️ ประเภท Map:</label>
+      <select id="mapType" onchange="showGlossary(this.value)">
+        <option value="fuel">Fuel</option>
+        <option value="torque_limiter">Torque Limiter</option>
+        <option value="drivers_wish">Drivers Wish</option>
+        <option value="fuel_quantity">Fuel Quantity</option>
+        <option value="injection_timing">Injection Timing</option>
+        <option value="boost_pressure">Boost Pressure</option>
+        <option value="rail_pressure">Rail Pressure</option>
+        <option value="turbo_duty">Turbo Duty</option>
+        <option value="smoke_limiter">Smoke Limiter</option>
+        <option value="iat_ect_correction">IAT & ECT Correction</option>
+        <option value="egr">EGR</option>
+        <option value="throttle">Throttle</option>
+        <option value="dtc_off">DTC Off</option>
+      </select>
+    </div>
 
-  <div id="glossary" style="margin-top: 10px; font-style: italic; color: #555;"></div>
-  <button onclick="sendFile()">🔍 วิเคราะห์ ECU Map</button>
+    <div id="glossary"></div>
+    <button onclick="sendFile()">🔍 วิเคราะห์ ECU Map</button>
 
-  <div id="log">📋 Log:</div>
-  <div id="result">🧾 ผลลัพธ์ JSON:</div>
-  <div id="mapChart"></div>
-  <div id="editor"></div>
-  <button onclick="updateChart()">📈 อัปเดตกราฟหลังแก้ไข</button>
+    <div class="log-container">
+      <h3 class="section-title">📋 Log:</h3>
+      <div id="log"></div>
+    </div>
+
+    <div class="result-container">
+      <h3 class="section-title">🧾 ผลลัพธ์ JSON:</h3>
+      <div id="result"></div>
+    </div>
+
+    <div class="chart-container">
+      <h3 class="section-title">📈 กราฟ ECU Map:</h3>
+      <div id="mapChart"></div>
+    </div>
+
+    <div class="editor-container">
+      <h3 class="section-title">📝 แก้ไขค่า Map:</h3>
+      <div id="editor"></div>
+      <button onclick="updateChart()">🔄 อัปเดตกราฟหลังแก้ไข</button>
+    </div>
+  </div>
+
   <script>
     let currentMap = [], xAxis = [], yAxis = [];
+
+    // Initial glossary load
+    document.addEventListener('DOMContentLoaded', () => {
+      showGlossary(document.getElementById('mapType').value);
+      document.getElementById('log').innerText = "📋 Log: ระบบพร้อมใช้งาน";
+      document.getElementById('result').innerText = "🧾 ผลลัพธ์จะแสดงที่นี่";
+    });
 
     async function sendFile() {
       const file = document.getElementById("binFile").files[0];
@@ -74,17 +260,18 @@
       const chartDiv = document.getElementById("mapChart");
       const editorDiv = document.getElementById("editor");
 
-      logDiv.innerHTML = "📋 Log:\n";
+      logDiv.innerHTML = ""; // Clear previous logs
       resultDiv.innerText = "🧾 กำลังวิเคราะห์...";
       chartDiv.innerHTML = "";
       editorDiv.innerHTML = "";
 
       if (!file) {
         log("❌ กรุณาเลือกไฟล์ .BIN", "error");
+        resultDiv.innerText = "🧾 ผลลัพธ์ JSON:";
         return;
       }
 
-      log(`📤 ส่งไฟล์ ${file.name} → Map: '${mapType}'`, "step");
+      log(`📤 กำลังส่งไฟล์ ${file.name} เพื่อวิเคราะห์ Map: '${mapType}'...`, "step");
 
       const formData = new FormData();
       formData.append('bin', file);
@@ -96,14 +283,29 @@
           body: formData
         });
 
-        if (!res.ok) throw new Error("เชื่อม backend ไม่สำเร็จ");
+        if (!res.ok) {
+          const errorText = await res.text();
+          throw new Error(`เชื่อมต่อ Backend ไม่สำเร็จ: ${res.status} ${res.statusText} - ${errorText}`);
+        }
 
         const data = await res.json();
         currentMap = data.map;
         xAxis = data.x_axis;
         yAxis = data.y_axis;
 
-        resultDiv.innerText = `✅ วิเคราะห์สำเร็จ: ${data.type} Map\n\n` + JSON.stringify(currentMap, null, 2);
+        resultDiv.innerText = `✅ วิเคราะห์สำเร็จ: ${data.type} Map (Offset: ${data.offset})\n\n` + JSON.stringify(currentMap, null, 2);
+
+        // Responsive chart layout
+        const chartLayout = {
+          title: `${data.type} Map – Offset ${data.offset}`,
+          autosize: true, // Auto-adjust size
+          margin: { t: 60, l: 60, r: 30, b: 40 },
+          xaxis: { title: "โหลด (%)", tickfont: { size: 12 } },
+          yaxis: { title: "รอบเครื่อง (RPM)", tickfont: { size: 12 } },
+          font: { family: "Kanit", size: 14, color: 'var(--text-color)' },
+          paper_bgcolor: 'var(--card-bg)', // Chart background
+          plot_bgcolor: 'var(--card-bg)'  // Plot area background
+        };
 
         Plotly.newPlot(chartDiv, [{
           z: currentMap,
@@ -112,17 +314,9 @@
           type: 'heatmap',
           colorscale: 'Jet',
           hoverongaps: false
-        }], {
-          title: `${data.type} Map – Offset ${data.offset}`,
-          width: 700,
-          height: 700,
-          margin: { t: 60, l: 60, r: 30, b: 40 },
-          xaxis: { title: "โหลด (%)", tickfont: { size: 12 } },
-          yaxis: { title: "รอบเครื่อง (RPM)", tickfont: { size: 12 } },
-          font: { family: "Arial", size: 14 }
-        });
+        }], chartLayout, { responsive: true }); // Make chart responsive
 
-        log("📊 วาดกราฟสำเร็จ", "success");
+        log("📊 วาดกราฟสำเร็จแล้ว", "success");
         renderEditor(currentMap);
 
       } catch (error) {
@@ -135,22 +329,28 @@
         div.innerText = msg;
         div.className = "log-" + type;
         logDiv.appendChild(div);
+        logDiv.scrollTop = logDiv.scrollHeight; // Scroll to bottom
       }
     }
 
     function renderEditor(map) {
       const editorDiv = document.getElementById("editor");
-      editorDiv.innerHTML = "<h4>📝 แก้ไขค่า Map:</h4><table border='1'>";
+      let tableHtml = "<table border='1'>";
       map.forEach((row, i) => {
-        editorDiv.innerHTML += "<tr>" +
-          row.map((val, j) => `<td><input type="number" step="0.01" value="${val}" data-i="${i}" data-j="${j}"></td>`).join("") +
-          "</tr>";
+        tableHtml += "<tr>";
+        row.map((val, j) => {
+          tableHtml += `<td><input type="number" step="0.01" value="${val}" data-i="${i}" data-j="${j}"></td>`;
+        }).join("");
+        tableHtml += "</tr>";
       });
-      editorDiv.innerHTML += "</table>";
+      tableHtml += "</table>";
+      editorDiv.innerHTML = tableHtml;
     }
 
     function updateChart() {
       const inputs = document.querySelectorAll("#editor input");
+      // Assuming a fixed size 16x16 map for simplicity based on the previous code.
+      // In a real application, you might get dimensions from currentMap or data.
       const updatedMap = Array.from({ length: 16 }, () => Array(16).fill(0));
       inputs.forEach(input => {
         const i = +input.dataset.i;
@@ -158,43 +358,49 @@
         updatedMap[i][j] = parseFloat(input.value) || 0;
       });
 
-      Plotly.newPlot(document.getElementById("mapChart"), [{
+      const chartDiv = document.getElementById("mapChart");
+      const chartLayout = {
+        title: "🛠 กราฟหลังแก้ไข",
+        autosize: true,
+        margin: { t: 60, l: 60, r: 30, b: 40 },
+        xaxis: { title: "โหลด (%)", tickfont: { size: 12 } },
+        yaxis: { title: "รอบเครื่อง (RPM)", tickfont: { size: 12 } },
+        font: { family: "Kanit", size: 14, color: 'var(--text-color)' },
+        paper_bgcolor: 'var(--card-bg)',
+        plot_bgcolor: 'var(--card-bg)'
+      };
+
+      Plotly.newPlot(chartDiv, [{
         z: updatedMap,
         x: xAxis,
         y: yAxis,
         type: 'heatmap',
         colorscale: 'Jet',
         hoverongaps: false
-      }], {
-        title: "🛠 กราฟหลังแก้ไข",
-        width: 700,
-        height: 700,
-        margin: { t: 60, l: 60, r: 30, b: 40 },
-        xaxis: { title: "โหลด (%)", tickfont: { size: 12 } },
-        yaxis: { title: "รอบเครื่อง (RPM)", tickfont: { size: 12 } },
-        font: { family: "Arial", size: 14 }
-      });
+      }], chartLayout, { responsive: true });
 
-      document.getElementById("result").innerText = "🛠 แก้ไขเรียบร้อยแล้ว\n\n" + JSON.stringify(updatedMap, null, 2);
+      document.getElementById("result").innerText = "🛠 Map ถูกแก้ไขแล้ว:\n\n" + JSON.stringify(updatedMap, null, 2);
+      document.getElementById("log").appendChild(document.createElement("div")).className = "log-success";
+      document.getElementById("log").lastChild.innerText = "✅ กราฟและข้อมูลอัปเดตเรียบร้อย!";
     }
 
     function showGlossary(type) {
       const descriptions = {
-        fuel: "ฉีดน้ำมันเท่าไรในแต่ละรอบ",
-        torque_limiter: "จำกัดแรงบิดเพื่อความปลอดภัย",
-        drivers_wish: "แรงบิดตามที่ผู้ขับต้องการ",
-        fuel_quantity: "น้ำมันจริงที่ฉีดโดย ECU",
-        injection_timing: "เวลาในการฉีด → ส่งผลต่อแรง/เสียง",
-        boost_pressure: "แรงดันจากเทอร์โบ → เร่งเครื่อง",
-        rail_pressure: "แรงดันน้ำมันในราง common rail",
-        turbo_duty: "ระดับสั่งงาน turbo actuator",
-        smoke_limiter: "จำกัดการฉีดเพื่อคุมควันดำ",
-        iat_ect_correction: "ปรับตามอุณหภูมิไอดี + น้ำหล่อเย็น",
-        egr: "ควบคุมระบบ EGR เพื่อหมุนไอเสีย",
-        throttle: "ลิ้นปีกผีเสื้อตามโหลดเครื่องยนต์",
-        dtc_off: "ตารางปิดไฟแจ้งเตือน DTC"
+        fuel: "ปริมาณน้ำมันเชื้อเพลิงที่หัวฉีดจะทำการฉีดในแต่ละรอบการทำงานของเครื่องยนต์ (มิลลิกรัม/จังหวะ)",
+        torque_limiter: "ตารางจำกัดแรงบิดสูงสุดของเครื่องยนต์ เพื่อป้องกันความเสียหายของชิ้นส่วน หรือเพื่อจำกัดกำลังขับเคลื่อน",
+        drivers_wish: "ตารางที่ระบุความต้องการแรงบิดจากผู้ขับขี่สัมพันธ์กับตำแหน่งคันเร่งและรอบเครื่องยนต์",
+        fuel_quantity: "ปริมาณน้ำมันเชื้อเพลิงจริงที่ ECU สั่งฉีด (มิลลิเมตรกำลังสาม/จังหวะ)",
+        injection_timing: "จังหวะเวลาในการฉีดน้ำมันเชื้อเพลิงเข้าสู่ห้องเผาไหม้ (องศาก่อนศูนย์ตายบน) → ส่งผลต่อกำลังเครื่องยนต์และเสียง",
+        boost_pressure: "แรงดันอากาศที่ผลิตโดยเทอร์โบชาร์จเจอร์ (มิลลิบาร์) → มีผลต่อการเร่งเครื่องยนต์",
+        rail_pressure: "แรงดันน้ำมันเชื้อเพลิงในรางร่วม (common rail) (บาร์)",
+        turbo_duty: "ค่าควบคุมการทำงานของวาล์วควบคุมเทอร์โบ (เปอร์เซ็นต์) → ควบคุมแรงดันบูสต์",
+        smoke_limiter: "ตารางจำกัดปริมาณการฉีดน้ำมันเพื่อควบคุมการเกิดควันดำจากการเผาไหม้",
+        iat_ect_correction: "ตารางปรับแก้น้ำมันตามอุณหภูมิอากาศเข้า (IAT) และอุณหภูมิน้ำหล่อเย็น (ECT)",
+        egr: "ตารางควบคุมระบบ EGR (Exhaust Gas Recirculation) เพื่อหมุนเวียนไอเสียกลับไปเผาไหม้ซ้ำ ลดมลพิษ",
+        throttle: "ตำแหน่งลิ้นปีกผีเสื้อสัมพันธ์กับโหลดของเครื่องยนต์และการกดคันเร่ง",
+        dtc_off: "ตารางหรือค่าที่ใช้ในการปิดรหัสข้อผิดพลาด (DTC) เพื่อไม่ให้ไฟแจ้งเตือนปรากฏบนหน้าปัด"
       };
-      document.getElementById("glossary").innerText = descriptions[type] || "";
+      document.getElementById("glossary").innerText = descriptions[type] || "ไม่พบคำอธิบายสำหรับ Map ชนิดนี้";
     }
   </script>
 </body>
