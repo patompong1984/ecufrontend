@@ -15,7 +15,7 @@
       padding: 10px;
       font-size: 16px;
     }
-    #log, #result, #mapChart {
+    #log, #result, #mapChart, #editor {
       margin-top: 10px;
       padding: 10px;
       background: #fff;
@@ -25,6 +25,11 @@
     .log-success { color: green; }
     .log-error { color: red; }
     .log-step { color: #333; }
+    table { border-collapse: collapse; }
+    td { padding: 2px; }
+    input[type="number"] {
+      width: 60px;
+    }
   </style>
 </head>
 <body>
@@ -45,19 +50,25 @@
   <div id="log">📋 Log ขั้นตอน:</div>
   <div id="result">🧾 ผลลัพธ์ JSON:</div>
   <div id="mapChart"></div>
+  <div id="editor"></div>
+  <button onclick="updateChart()">📈 อัปเดตกราฟหลังแก้ไข</button>
 
   <script>
+    let currentMap = [];
+    let chartDiv = document.getElementById("mapChart");
+    let resultDiv = document.getElementById("result");
+
     async function sendFile() {
       const fileInput = document.getElementById("binFile");
       const mapType = document.getElementById("mapType").value;
       const file = fileInput.files[0];
       const logDiv = document.getElementById("log");
-      const resultDiv = document.getElementById("result");
-      const chartDiv = document.getElementById("mapChart");
+      const editorDiv = document.getElementById("editor");
 
       logDiv.innerHTML = "📋 Log ขั้นตอน:\n";
       resultDiv.innerText = "🧾 กำลังวิเคราะห์...";
       chartDiv.innerHTML = "";
+      editorDiv.innerHTML = "";
 
       if (!file) {
         log("❌ ยังไม่ได้เลือกไฟล์", "error");
@@ -85,9 +96,10 @@
         log("✅ backend ตอบกลับเรียบร้อย", "success");
 
         resultDiv.innerText = `✅ วิเคราะห์สำเร็จ: ${data.type} Map\n\n` + JSON.stringify(data.map, null, 2);
+        currentMap = data.map;
 
         Plotly.newPlot(chartDiv, [{
-          z: data.map,
+          z: currentMap,
           type: 'heatmap',
           colorscale: 'YlGnBu'
         }], {
@@ -96,6 +108,7 @@
         });
 
         log("📊 วาดกราฟสำเร็จ", "success");
+        renderEditor(currentMap);
 
       } catch (error) {
         resultDiv.innerText = "❌ เกิดข้อผิดพลาด: " + error.message;
@@ -109,7 +122,38 @@
         logDiv.appendChild(span);
       }
     }
-  </script>
 
+    function renderEditor(map) {
+      const editorDiv = document.getElementById("editor");
+      editorDiv.innerHTML = "<h4>📝 แก้ไขค่า Map:</h4><table border='1'>";
+      map.forEach((row, i) => {
+        editorDiv.innerHTML += "<tr>" +
+          row.map((val, j) => `<td><input type="number" step="0.01" value="${val}" data-i="${i}" data-j="${j}"></td>`).join("") +
+          "</tr>";
+      });
+      editorDiv.innerHTML += "</table>";
+    }
+
+    function updateChart() {
+      const inputs = document.querySelectorAll("#editor input");
+      const updatedMap = Array.from({ length: 16 }, () => Array(16).fill(0));
+      inputs.forEach(input => {
+        const i = +input.dataset.i;
+        const j = +input.dataset.j;
+        updatedMap[i][j] = parseFloat(input.value) || 0;
+      });
+
+      Plotly.newPlot(chartDiv, [{
+        z: updatedMap,
+        type: 'heatmap',
+        colorscale: 'YlGnBu'
+      }], {
+        title: "🛠 กราฟหลังแก้ไข",
+        margin: { t: 40 }
+      });
+
+      resultDiv.innerText = "🛠 แก้ไขเรียบร้อยแล้ว\n\n" + JSON.stringify(updatedMap, null, 2);
+    }
+  </script>
 </body>
 </html>
