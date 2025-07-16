@@ -84,10 +84,10 @@ document.getElementById("uploadForm").addEventListener("submit", function (e) {
   formData.append("bin", file);
   formData.append("type", mapType);
 
-  fetch("/analyze", {
-    method: "POST",
-    body: formData
-  })
+  fetch("https://ecu-backend-m07d.onrender.com/analyze", {
+  method: "POST",
+  body: formData
+})
   .then(res => res.json())
   .then(data => {
     if (!data.map || !Array.isArray(data.map)) {
