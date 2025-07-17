@@ -948,7 +948,6 @@
   </div>
 
   <div class="main-content">
-    <!-- Upload Section -->
     <div id="uploadSection" class="section">
       <h2>อัปโหลดไฟล์ .BIN</h2>
       <form id="uploadForm" class="form-controls">
@@ -958,11 +957,10 @@
           <div class="loading-spinner" id="analyzeInitialSpinner"></div>
         </button>
       </form>
-      <div id="fileUploadStatus" class="status-message"></div>
+      <div id="fileUploadStatus" class="status-message"></div> 
       <div id="glossary">คำอธิบายการใช้งาน: อัปโหลดไฟล์ .BIN ของ ECU เพื่อเริ่มต้น</div>
     </div>
 
-    <!-- Hex View Section -->
     <div id="hexViewSection" class="section" style="display: none;">
       <h2>มุมมอง Hex ของไฟล์</h2>
       <div class="hex-controls">
@@ -980,7 +978,6 @@
       </div>
     </div>
 
-    <!-- Map Definitions Section -->
     <div id="mapDefinitionsSection" class="section" style="display: none;">
       <h2>กำหนด/จัดการแผนที่</h2>
       <form id="mapDefinitionForm">
@@ -1213,7 +1210,8 @@
             if (!confirm('คุณมีการเปลี่ยนแปลงที่ยังไม่ได้บันทึกในแผนที่ปัจจุบัน หากออกจากหน้านี้ การเปลี่ยนแปลงจะหายไป\n\nดำเนินการต่อหรือไม่?')) {
                 return; // User cancelled, stay on current section
             }
-            hasUnsavedChanges = false; // User confirmed to discard changes
+            // User confirmed to discard changes
+            hasUnsavedChanges = false; 
             updateSaveStatus();
         }
         
@@ -1274,6 +1272,7 @@
 
     // Function to update the save status text/color
     function updateSaveStatus() {
+        // Only show status if a map is currently being analyzed
         if (!currentAnalyzedMapData) {
             elements.saveStatus.textContent = '';
             elements.saveStatus.className = 'save-status';
@@ -1295,6 +1294,10 @@
         loadUserDefinedMapsFromStorage();
         populateMapDropdowns();
         updateNavButtonsState();
+        // Clear initial status messages
+        displayStatus(elements.fileUploadStatus, '');
+        displayStatus(elements.mapDefinitionStatus, '');
+        displayStatus(elements.analysisStatus, '');
     });
 
     // --- Navigation Event Listeners ---
@@ -1315,6 +1318,7 @@
             renderCurrentChartView(); // Re-render chart/table if already analyzed
         } else {
             elements.mapDisplayArea.style.display = 'none'; // Hide map display if no map is loaded
+            displayStatus(elements.analysisStatus, 'กรุณาเลือกแผนที่เพื่อวิเคราะห์', 'info'); // Prompt user
         }
     });
 
@@ -1323,12 +1327,18 @@
         e.preventDefault();
         console.log("[UploadForm] Submit event triggered."); // Debug log
         elements.uploadFileButton.disabled = true;
-        elements.saveTunedFileButton.disabled = true;
+        elements.saveTunedFileButton.disabled = true; // Disable save button during upload/analysis
         toggleLoadingSpinner(elements.analyzeInitialSpinner, true);
         displayStatus(elements.fileUploadStatus, 'กำลังอัปโหลดไฟล์...');
 
         const file = elements.binFileInput.files[0];
         console.log("[UploadForm] Selected file:", file); // Debug log
+
+        // Reset current analyzed map data and unsaved changes on new file upload
+        currentAnalyzedMapData = null;
+        currentAnalyzedMapInfo = null;
+        initialMapDataSnapshot = null;
+        hasUnsavedChanges = false;
 
         currentBinFile = file; // Store the original file globally
 
@@ -1336,6 +1346,7 @@
             displayStatus(elements.fileUploadStatus, "❌ กรุณาเลือกไฟล์ .bin", 'error');
             elements.uploadFileButton.disabled = false;
             toggleLoadingSpinner(elements.analyzeInitialSpinner, false);
+            updateNavButtonsState(); // Update nav buttons (they should still be disabled)
             return;
         }
 
@@ -1357,6 +1368,7 @@
         } finally {
             elements.uploadFileButton.disabled = false;
             toggleLoadingSpinner(elements.analyzeInitialSpinner, false);
+            updateNavButtonsState(); // Ensure correct button states after all operations
         }
     });
 
@@ -1922,7 +1934,7 @@
             title: `${currentAnalyzedMapInfo.display_name} (${currentAnalyzedMapInfo.unit || "?"})`,
             scene: {
                 xaxis: { title: currentAnalyzedMapInfo.x_axis_offset !== null ? `X-Axis (Offset: ${decToHex(currentAnalyzedMapInfo.x_axis_offset)})` : "X-Axis" },
-                yaxis: { title: currentAnalyizedMapInfo.y_axis_offset !== null ? `Y-Axis (Offset: ${decToHex(currentAnalyzedMapInfo.y_axis_offset)})` : "Y-Axis" },
+                yaxis: { title: currentAnalyzedMapInfo.y_axis_offset !== null ? `Y-Axis (Offset: ${decToHex(currentAnalyzedMapInfo.y_axis_offset)})` : "Y-Axis" },
                 zaxis: { title: currentAnalyzedMapInfo.unit || "Value" }
             },
             autosize: true,
@@ -2102,8 +2114,8 @@
             if (plotIndex >= 0 && plotIndex < currentAnalyzedMapData.length) {
                 yValues = currentAnalyzedMapData[plotIndex];
                 xValues = currentAnalyzedMapInfo.x_axis;
-                title = `${currentAnalyzedMapInfo.display_name} - Row Index ${plotIndex} (Y-Axis: ${currentAnalyzedMapInfo.y_axis[plotIndex].toFixed(2)})`;
-                xAxisTitle = `X-Axis (Offset: ${currentAnalyizedMapInfo.x_axis_offset !== null ? decToHex(currentAnalyzedMapInfo.x_axis_offset) : 'N/A'})`;
+                title = `${currentAnalyzedMapInfo.display_name} - Row Index ${plotIndex} (Y-Axis: ${currentAnalyzedMapInfo.y_axis[plotIndex] !== null ? currentAnalyzedMapInfo.y_axis[plotIndex].toFixed(2) : 'N/A'})`;
+                xAxisTitle = `X-Axis (Offset: ${currentAnalyzedMapInfo.x_axis_offset !== null ? decToHex(currentAnalyzedMapInfo.x_axis_offset) : 'N/A'})`;
             } else {
                 console.warn("Invalid row index for line plot.");
                 yValues = []; xValues = []; title = "No data for selected row.";
@@ -2112,7 +2124,7 @@
             if (plotIndex >= 0 && plotIndex < currentAnalyzedMapData[0].length) {
                 yValues = currentAnalyzedMapData.map(row => row[plotIndex]);
                 xValues = currentAnalyzedMapInfo.y_axis; // Y-axis values become X-axis for column plot
-                title = `${currentAnalyzedMapInfo.display_name} - Col Index ${plotIndex} (X-Axis: ${currentAnalyzedMapInfo.x_axis[plotIndex].toFixed(2)})`;
+                title = `${currentAnalyzedMapInfo.display_name} - Col Index ${plotIndex} (X-Axis: ${currentAnalyzedMapInfo.x_axis[plotIndex] !== null ? currentAnalyzedMapInfo.x_axis[plotIndex].toFixed(2) : 'N/A'})`;
                 xAxisTitle = `Y-Axis (Offset: ${currentAnalyzedMapInfo.y_axis_offset !== null ? decToHex(currentAnalyzedMapInfo.y_axis_offset) : 'N/A'})`;
             } else {
                 console.warn("Invalid column index for line plot.");
@@ -2220,4 +2232,3 @@
   </script>
 </body>
 </html>
-
