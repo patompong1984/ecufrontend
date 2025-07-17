@@ -6,21 +6,28 @@
   <title>ECU Map Analyzer & Tuner - Enhanced</title>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <style>
+    /* --- Variables for Theming --- */
     :root {
-      --primary: #2c3e50;
-      --secondary: #3498db;
-      --success: #28a745;
-      --warning: #f39c12;
-      --danger: #dc3545;
-      --light: #f8f9fa;
-      --dark: #343a40;
+      --primary: #2c3e50; /* Dark Blue */
+      --secondary: #3498db; /* Bright Blue */
+      --success: #28a745; /* Green */
+      --warning: #f39c12; /* Orange */
+      --danger: #dc3545; /* Red */
+      --light: #f8f9fa; /* Light Gray */
+      --dark: #343a40; /* Dark Gray */
+      --bg-light: #f6f6f6;
+      --bg-card: #fff;
+      --border-color: #ddd;
+      --shadow-light: rgba(0,0,0,0.08);
+      --shadow-medium: rgba(0,0,0,0.15);
     }
     
+    /* --- General Styling --- */
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       padding: 0;
       margin: 0;
-      background-color: #f6f6f6;
+      background-color: var(--bg-light);
       color: #333;
       display: flex;
       flex-direction: column;
@@ -28,14 +35,15 @@
       line-height: 1.6;
     }
     
+    /* --- Header --- */
     .header {
       background: linear-gradient(135deg, var(--primary), #1a2530);
       color: white;
-      padding: 15px 20px;
+      padding: 10px 15px; /* Reduced padding */
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      box-shadow: 0 4px 12px var(--shadow-medium);
       position: sticky;
       top: 0;
       z-index: 100;
@@ -43,46 +51,48 @@
     
     .header h1 {
       margin: 0;
-      font-size: 24px;
+      font-size: 22px; /* Slightly reduced font size */
       font-weight: 600;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px; /* Reduced gap */
     }
     
     .header h1::before {
-      content: "⚙️";
+      content: "⚙️"; /* Gear icon */
+      font-size: 1.1em; /* Adjust icon size */
     }
     
+    /* --- Navigation Tabs --- */
     .nav-tabs {
       background-color: #34495e;
-      padding: 12px 20px;
+      padding: 8px 15px; /* Reduced padding */
       display: flex;
-      gap: 10px;
+      gap: 8px; /* Reduced gap */
       flex-wrap: wrap;
-      border-bottom: 1px solid #2c3e50;
+      border-bottom: 1px solid var(--primary);
     }
     
     .nav-tabs button {
       background: rgba(255, 255, 255, 0.1);
       border: 1px solid rgba(255, 255, 255, 0.2);
       color: white;
-      padding: 10px 18px;
+      padding: 8px 15px; /* Reduced padding */
       cursor: pointer;
-      font-size: 16px;
+      font-size: 15px; /* Slightly reduced font size */
       border-radius: 6px;
       transition: all 0.3s ease;
       font-weight: 500;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px; /* Reduced gap */
     }
     
     .nav-tabs button:hover:not(:disabled) {
       background-color: #4a627d;
       border-color: white;
       transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 8px var(--shadow-medium);
     }
     
     .nav-tabs button.active {
@@ -107,6 +117,7 @@
       border-color: #1e7e34 !important;
     }
 
+    /* --- Main Content Area --- */
     .main-content {
       flex-grow: 1;
       padding: 20px;
@@ -115,11 +126,12 @@
       align-items: center;
     }
 
+    /* --- Section Cards --- */
     .section {
-      background-color: #fff;
+      background-color: var(--bg-card);
       padding: 30px;
       border-radius: 12px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+      box-shadow: 0 6px 20px var(--shadow-light);
       margin-bottom: 25px;
       width: 100%;
       max-width: 1200px;
@@ -152,7 +164,7 @@
       border-radius: 2px;
     }
 
-    /* Form and Controls */
+    /* --- Form Controls (General) --- */
     .form-controls {
       display: flex;
       flex-wrap: wrap;
@@ -171,18 +183,17 @@
     
     .form-controls select,
     .form-controls input[type="file"],
-    .form-controls button,
     .form-controls input[type="text"],
     .form-controls input[type="number"] {
       padding: 12px 18px;
-      border: 1px solid #ddd;
+      border: 1px solid var(--border-color);
       border-radius: 8px;
       font-size: 16px;
       flex-grow: 1;
       min-width: 180px;
       box-sizing: border-box;
       transition: all 0.3s ease;
-      background-color: #fff;
+      background-color: var(--bg-card);
     }
     
     .form-controls select:focus,
@@ -205,11 +216,13 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
+      padding: 12px 18px; /* Match input padding */
+      border-radius: 8px; /* Match input border-radius */
     }
     
     .form-controls button:hover { 
       transform: translateY(-2px); 
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      box-shadow: 0 4px 12px var(--shadow-medium);
     }
     
     .form-controls button:disabled { 
@@ -219,6 +232,7 @@
       box-shadow: none;
     }
 
+    /* --- Glossary / Info Box --- */
     #glossary {
       margin-top: 15px;
       color: #444;
@@ -231,12 +245,36 @@
       box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
     }
 
-    /* Hex Viewer Specific */
+    /* --- Status Messages --- */
+    .status-message {
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 5px;
+        font-weight: bold;
+        text-align: center;
+    }
+    .status-message.success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    .status-message.error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    .status-message.info {
+        background-color: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+    }
+
+    /* --- Hex Viewer Specific --- */
     #hexViewer {
-      font-family: 'Fira Code', 'Courier New', monospace;
+      font-family: 'Fira Code', 'Courier New', monospace; /* Modern monospace font */
       white-space: pre;
       overflow-x: auto;
-      border: 1px solid #ddd;
+      border: 1px solid var(--border-color);
       background-color: #fcfcfc;
       padding: 15px;
       max-height: 500px;
@@ -247,7 +285,7 @@
       box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
     }
     
-    #hexViewer .hex-content {
+    #hexViewer .hex-content-inner { /* Inner div for actual hex rows */
       position: relative;
     }
     
@@ -258,12 +296,12 @@
     }
     
     #hexViewer .hex-row:hover {
-      background-color: rgba(52, 152, 219, 0.05);
+      background-color: rgba(52, 152, 219, 0.05); /* Light blue hover */
     }
     
     #hexViewer .hex-offset {
       color: #888;
-      width: 90px;
+      width: 90px; /* Fixed width for offset column */
       flex-shrink: 0;
       font-weight: 600;
       user-select: none;
@@ -276,7 +314,7 @@
     
     #hexViewer .hex-byte {
       display: inline-block;
-      width: 2.5ch;
+      width: 2.5ch; /* For hex pair like FF */
       text-align: center;
       cursor: pointer;
       user-select: none;
@@ -287,17 +325,17 @@
     }
     
     #hexViewer .hex-byte:hover {
-      background-color: rgba(173, 216, 230, 0.5);
+      background-color: rgba(173, 216, 230, 0.5); /* Lighter blue on hover */
     }
     
     #hexViewer .hex-byte.selected {
-      background-color: #add8e6;
+      background-color: #add8e6; /* Light blue */
       font-weight: bold;
-      box-shadow: 0 0 0 1px #2a6496;
+      box-shadow: 0 0 0 1px #2a6496; /* Darker blue border for selection */
     }
     
     #hexViewer .ascii-display {
-      width: 180px;
+      width: 180px; /* Fixed width for ASCII column */
       color: #555;
       flex-shrink: 0;
       margin-left: 15px;
@@ -310,7 +348,7 @@
       gap: 15px;
       margin-bottom: 15px;
       flex-wrap: wrap;
-      background: #f0f8ff;
+      background: #f0f8ff; /* Light blue background */
       padding: 15px;
       border-radius: 8px;
       border: 1px solid #d1e7ff;
@@ -330,30 +368,31 @@
     
     .hex-controls button:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      box-shadow: 0 4px 12px var(--shadow-medium);
     }
     
     .hex-selection-info {
-      background: #e8f4fc;
+      background: #e8f4fc; /* Very light blue */
       padding: 10px 15px;
       border-radius: 6px;
       font-weight: 500;
       display: flex;
       align-items: center;
       gap: 10px;
+      color: var(--primary);
     }
     
     .truncated-message {
       text-align: center;
-      color: #d35400;
+      color: #d35400; /* Darker orange */
       margin-top: 15px;
       padding: 10px;
-      background-color: #fff8e6;
+      background-color: #fff8e6; /* Light orange background */
       border-radius: 6px;
       font-weight: 500;
     }
 
-    /* Map Definition Form */
+    /* --- Map Definition Form --- */
     #mapDefinitionForm {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -447,7 +486,7 @@
       box-shadow: 0 6px 15px rgba(40, 167, 69, 0.3);
     }
 
-    /* Map List */
+    /* --- Map List --- */
     #userDefinedMapsList {
       margin-top: 30px;
       padding-top: 20px;
@@ -485,7 +524,7 @@
     
     #userDefinedMapsList li:hover {
       transform: translateY(-3px);
-      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+      box_shadow: 0 6px 15px rgba(0,0,0,0.1);
     }
     
     #userDefinedMapsList li span {
@@ -539,7 +578,7 @@
       box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
     }
 
-    /* Map Display Area */
+    /* --- Map Display Area --- */
     #mapDisplayArea {
       display: flex;
       flex-direction: column;
@@ -550,6 +589,29 @@
       align-self: center;
     }
     
+    .map-info {
+        background-color: #e9f5ff; /* Light blue info box */
+        border: 1px solid #b3d9ff;
+        padding: 15px;
+        border-radius: 8px;
+        color: #2a6496;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .map-info h3 {
+        text-align: left;
+        margin-top: 0;
+        margin-bottom: 10px;
+        color: var(--primary);
+        font-size: 20px;
+    }
+    .map-info p {
+        margin: 5px 0;
+        font-size: 15px;
+    }
+    .map-info strong {
+        color: #1a4e7a;
+    }
+
     #mapChart {
       margin-top: 0;
       border: 1px solid #eee;
@@ -557,10 +619,10 @@
       overflow: hidden;
       flex-grow: 1;
       min-height: 500px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 15px var(--shadow-light);
     }
 
-    /* Table styling for editing */
+    /* --- Table Styling for Editing --- */
     #editableMapTableContainer {
       margin-top: 0;
       overflow-x: auto;
@@ -569,8 +631,8 @@
       border: 1px solid #e0e0e0;
       border-radius: 10px;
       padding: 15px;
-      background: #fff;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      background: var(--bg-card);
+      box-shadow: 0 4px 15px var(--shadow-light);
     }
     
     #editableMapTable {
@@ -592,7 +654,7 @@
     #editableMapTable th {
       background: linear-gradient(to bottom, #f0f0f0, #e0e0e0);
       font-weight: 600;
-      color: #2c3e50;
+      color: var(--primary);
     }
     
     #editableMapTable td {
@@ -611,27 +673,28 @@
     }
     
     .axis-label {
-      font-weight: 600;
-      background-color: #f0f8ff;
-      color: var(--primary);
+        font-weight: 600;
+        background-color: #f0f8ff; /* Light blue for axis labels */
+        color: var(--primary);
     }
     
     .modified-cell {
-      background-color: #fffacd !important;
-      border-color: var(--warning) !important;
-      position: relative;
+        background-color: #fffacd !important; /* Light yellow for modified cells */
+        border-color: var(--warning) !important;
+        position: relative;
     }
     
     .modified-cell::after {
-      content: "*";
-      position: absolute;
-      top: 2px;
-      right: 2px;
-      color: var(--warning);
-      font-weight: bold;
+        content: "*"; /* Asterisk to indicate modification */
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        color: var(--warning);
+        font-weight: bold;
+        font-size: 0.8em;
     }
 
-    /* Controls for Plot/Table Toggle */
+    /* --- Controls for Plot/Table Toggle --- */
     .tuning-controls {
       display: flex;
       flex-wrap: wrap;
@@ -641,6 +704,7 @@
       background: #f8f9fa;
       padding: 15px;
       border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
     
     .tuning-controls button {
@@ -666,41 +730,51 @@
       background: linear-gradient(to right, var(--secondary), #2980b9);
       box-shadow: 0 0 15px rgba(52, 152, 219, 0.3);
     }
+    .tuning-controls .btn.danger { /* Style for reset button */
+        background-color: var(--danger);
+        color: white;
+    }
+    .tuning-controls .btn.danger:hover {
+        background-color: #c82333;
+    }
 
-    /* Controls for 2D Plot */
+    /* --- Controls for 2D Plot --- */
     #linePlotControls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-      margin-top: 20px;
-      align-items: center;
-      background-color: #f0f8ff;
-      padding: 15px;
-      border-radius: 8px;
-      justify-content: center;
-      border: 1px solid #d1e7ff;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 20px;
+        align-items: center;
+        background-color: #f0f8ff;
+        padding: 15px;
+        border-radius: 8px;
+        justify-content: center;
+        border: 1px solid #d1e7ff;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
     
     #linePlotControls label {
-      font-weight: 500;
-      margin-right: 0;
-      color: #2c3e50;
+        font-weight: 500;
+        margin-right: 0;
+        color: var(--primary);
     }
     
     #linePlotControls select {
-      padding: 10px 15px;
-      border-radius: 6px;
-      border: 1px solid #d1d1d1;
-      background: #fff;
+        padding: 10px 15px;
+        border-radius: 6px;
+        border: 1px solid #d1d1d1;
+        background: #fff;
     }
     
     #linePlotControls input[type="range"] {
-      flex-grow: 1;
-      min-width: 200px;
-      height: 8px;
-      border-radius: 4px;
-      background: #e0e0e0;
-      outline: none;
+        flex-grow: 1;
+        min-width: 200px;
+        height: 8px;
+        border-radius: 4px;
+        background: #e0e0e0;
+        outline: none;
+        -webkit-appearance: none; /* For Chrome/Safari */
+        appearance: none;
     }
     
     #linePlotControls input[type="range"]::-webkit-slider-thumb {
@@ -711,25 +785,36 @@
       background: var(--secondary);
       cursor: pointer;
       box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      margin-top: -7px; /* Center thumb vertically */
+    }
+    #linePlotControls input[type="range"]::-moz-range-thumb { /* For Firefox */
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--secondary);
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     }
 
-    /* Loading Spinner */
+    /* --- Loading Spinner --- */
     .loading-spinner {
-      display: none;
-      border: 4px solid rgba(52, 152, 219, 0.2);
-      border-top: 4px solid var(--secondary);
-      border-radius: 50%;
-      width: 30px;
-      height: 30px;
-      animation: spin 1s linear infinite;
-      margin-left: 12px;
+        display: none;
+        border: 4px solid rgba(52, 152, 219, 0.2);
+        border-top: 4px solid var(--secondary);
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        animation: spin 1s linear infinite;
+        margin-left: 12px;
+        vertical-align: middle;
     }
     
     @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
     }
     
+    /* --- Save Status Display --- */
     .save-status {
       display: inline-flex;
       align-items: center;
@@ -740,28 +825,43 @@
       border-radius: 20px;
       background-color: #f0f8ff;
       color: var(--secondary);
+      font-size: 14px;
     }
     
     .unsaved-changes {
-      background-color: #fff8e6;
+      background-color: #fff8e6; /* Light orange */
       color: var(--warning);
     }
     
     .saved {
-      background-color: #e8f5e9;
+      background-color: #e8f5e9; /* Light green */
       color: var(--success);
     }
 
-    /* Mobile-specific adjustments */
+    /* --- Mobile-specific adjustments --- */
     @media (max-width: 768px) {
       .header {
         flex-direction: column;
         align-items: flex-start;
-        gap: 15px;
+        gap: 10px; /* Reduced gap for header elements */
+        padding: 8px 10px; /* Further reduced padding for header on mobile */
       }
       
+      .header h1 {
+        font-size: 20px; /* Smaller font for header title on mobile */
+      }
+
       .nav-tabs {
         justify-content: flex-start;
+        padding: 8px 10px; /* Reduced padding for nav tabs on mobile */
+        gap: 5px; /* Reduced gap between nav buttons */
+      }
+      
+      .nav-tabs button {
+        width: 100%;
+        margin-bottom: 5px;
+        padding: 8px 10px; /* Reduced padding for nav buttons */
+        font-size: 14px; /* Smaller font for nav buttons */
       }
       
       .section {
@@ -786,7 +886,7 @@
         min-width: unset;
       }
       
-      #hexViewer .hex-content {
+      #hexViewer .hex-content-inner {
         font-size: 0.85em;
       }
       
@@ -812,8 +912,24 @@
         grid-template-columns: 1fr;
       }
       
+      #mapDefinitionForm .form-row {
+        flex-direction: column;
+        gap: 5px;
+      }
+      
       #userDefinedMapsList ul {
         grid-template-columns: 1fr;
+      }
+      
+      #userDefinedMapsList li {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+      }
+      
+      #userDefinedMapsList li button {
+        margin-left: 0;
+        width: 100%;
       }
     }
   </style>
@@ -822,7 +938,7 @@
   <div class="header">
     <h1>ECU Map Analyzer & Tuner</h1>
     <div class="nav-tabs">
-      <button id="navUploadFile">📤 อัปโหลดไฟล์</button>
+      <button id="navUploadFile" class="active">📤 อัปโหลดไฟล์</button>
       <button id="navHexView" disabled>🔢 มุมมอง Hex</button>
       <button id="navMapDefinitions" disabled>🗺️ กำหนดแผนที่</button>
       <button id="navAnalyzeMap" disabled>📊 วิเคราะห์/จูนแผนที่</button>
@@ -832,6 +948,7 @@
   </div>
 
   <div class="main-content">
+    <!-- Upload Section -->
     <div id="uploadSection" class="section">
       <h2>อัปโหลดไฟล์ .BIN</h2>
       <form id="uploadForm" class="form-controls">
@@ -841,9 +958,11 @@
           <div class="loading-spinner" id="analyzeInitialSpinner"></div>
         </button>
       </form>
-      <div id="glossary">ไฟล์ ECU .BIN ที่อัปโหลดจะถูกวิเคราะห์เพื่อค้นหาแผนที่ที่กำหนดไว้ล่วงหน้า คำอธิบายแผนที่จะปรากฏที่นี่เมื่อมีการเลือกแผนที่</div>
+      <div id="fileUploadStatus" class="status-message"></div>
+      <div id="glossary">คำอธิบายการใช้งาน: อัปโหลดไฟล์ .BIN ของ ECU เพื่อเริ่มต้น</div>
     </div>
 
+    <!-- Hex View Section -->
     <div id="hexViewSection" class="section" style="display: none;">
       <h2>มุมมอง Hex ของไฟล์</h2>
       <div class="hex-controls">
@@ -861,6 +980,7 @@
       </div>
     </div>
 
+    <!-- Map Definitions Section -->
     <div id="mapDefinitionsSection" class="section" style="display: none;">
       <h2>กำหนด/จัดการแผนที่</h2>
       <form id="mapDefinitionForm">
@@ -870,8 +990,8 @@
         <label>หน่วย (เช่น mg/stroke, RPM):<input type="text" name="unit" placeholder="เช่น mg/stroke" /></label>
         <label>Offset แผนที่ (Hex/Dec):<input type="text" name="block" required placeholder="เช่น 0x1A2B หรือ 6700" /></label>
         <div class="form-row">
-            <label>จำนวนแถว:<input type="number" name="rows" min="1" max="100" required placeholder="เช่น 16" /></label>
-            <label>จำนวนคอลัมน์:<input type="number" name="cols" min="1" max="100" required placeholder="เช่น 12" /></label>
+            <label>จำนวนแถว:<input type="number" name="rows" min="1" max="100" required value="16" /></label>
+            <label>จำนวนคอลัมน์:<input type="number" name="cols" min="1" max="100" required value="12" /></label>
         </div>
         <div class="form-row">
             <label>ชนิดข้อมูล:<select name="dataType">
@@ -886,17 +1006,19 @@
         <h4>การแปลงค่า (Conversion Settings)</h4>
         <div class="form-row">
             <label>Factor (ตัวคูณ):<input type="number" step="any" name="factor" value="0.1" placeholder="เช่น 0.1" /></label>
-            <label>Offset (ตัวบวก/ลบ):<input type="number" step="any" name="offset" value="0" placeholder="เช่น -10" /></label>
+            <label>Offset (ตัวบวก/ลบ):<input type="number" step="any" name="offset" value="0.0" placeholder="เช่น -10" /></label>
         </div>
         <h4>แกน X (X-Axis)</h4>
         <label>Offset แกน X (Hex/Dec):<input type="text" name="xAxisOffset" placeholder="เช่น 0x1A2B หรือ 6700" /></label>
         <div class="form-row">
             <label>ชนิดข้อมูลแกน X:<select name="xAxisDataType">
-                <option value="16bit" selected>16-bit</option>
+                <option value="inherit" selected>ใช้ตาม Map</option>
                 <option value="8bit">8-bit</option>
+                <option value="16bit">16-bit</option>
                 </select></label>
             <label>Endianness แกน X:<select name="xAxisEndian">
-                <option value="<H" selected>Little-endian</option>
+                <option value="inherit" selected>ใช้ตาม Map</option>
+                <option value="<H">Little-endian</option>
                 <option value=">H">Big-endian</option>
             </select></label>
             <label>Scale แกน X:<input type="number" step="any" name="xScale" value="1.0" placeholder="เช่น 1.0" /></label>
@@ -905,42 +1027,24 @@
         <label>Offset แกน Y (Hex/Dec):<input type="text" name="yAxisOffset" placeholder="เช่น 0x1A2B หรือ 6700" /></label>
         <div class="form-row">
             <label>ชนิดข้อมูลแกน Y:<select name="yAxisDataType">
-                <option value="16bit" selected>16-bit</option>
+                <option value="inherit" selected>ใช้ตาม Map</option>
                 <option value="8bit">8-bit</option>
+                <option value="16bit">16-bit</option>
                 </select></label>
             <label>Endianness แกน Y:<select name="yAxisEndian">
-                <option value="<H" selected>Little-endian</option>
+                <option value="inherit" selected>ใช้ตาม Map</option>
+                <option value="<H">Little-endian</option>
                 <option value=">H">Big-endian</option>
             </select></label>
             <label>Scale แกน Y:<input type="number" step="any" name="yScale" value="1.0" placeholder="เช่น 1.0" /></label>
         </div>
         <button type="submit">💾 บันทึกนิยามแผนที่</button>
+        <div id="mapDefinitionStatus" class="status-message"></div>
       </form>
 
       <div id="userDefinedMapsList">
         <h3>แผนที่ที่กำหนดเอง</h3>
-        <ul>
-          <li>
-            <div>
-              <span><strong>แผนที่เชื้อเพลิงหลัก</strong></span>
-              <div class="map-details">16x12 @ 0x1A2B, ปัจจัย: 0.1, Offset: 0</div>
-            </div>
-            <div>
-              <button class="analyze-btn">📊 วิเคราะห์</button>
-              <button class="delete-btn">🗑️ ลบ</button>
-            </div>
-          </li>
-          <li>
-            <div>
-              <span><strong>แผนที่จุดระเบิด</strong></span>
-              <div class="map-details">16x16 @ 0x2C4D, ปัจจัย: 0.5, Offset: -5</div>
-            </div>
-            <div>
-              <button class="analyze-btn">📊 วิเคราะห์</button>
-              <button class="delete-btn">🗑️ ลบ</button>
-            </div>
-          </li>
-        </ul>
+        <ul></ul>
       </div>
     </div>
 
@@ -948,26 +1052,33 @@
       <h2>วิเคราะห์และจูนแผนที่</h2>
       <div class="form-controls">
         <label for="selectAnalyzeMap">เลือกแผนที่:</label>
-        <select id="selectAnalyzeMap">
-          <option value="">-- เลือกแผนที่เพื่อวิเคราะห์ --</option>
-          <option value="fuel_map">แผนที่เชื้อเพลิงหลัก</option>
-          <option value="ignition_map">แผนที่จุดระเบิด</option>
-          <option value="boost_map">แผนที่บูสต์</option>
-        </select>
+        <select id="selectAnalyzeMap"></select>
         <button id="analyzeSelectedMapButton">
           <span>วิเคราะห์แผนที่ที่เลือก</span>
           <div class="loading-spinner" id="analyzeSelectedSpinner"></div>
         </button>
       </div>
+      <div id="analysisStatus" class="status-message"></div>
 
       <div id="mapDisplayArea" style="display: none;">
+        <div class="map-info">
+            <h3>ข้อมูลแผนที่: <span id="analyzedMapDisplayName"></span></h3>
+            <p><strong>Offset:</strong> <span id="analyzedMapOffset"></span> |
+               <strong>ขนาด:</strong> <span id="analyzedMapSize"></span> |
+               <strong>หน่วย:</strong> <span id="analyzedMapUnit"></span></p>
+            <p><strong>แกน X Offset:</strong> <span id="analyzedXAxisOffset"></span> |
+               <strong>แกน Y Offset:</strong> <span id="analyzedYAxisOffset"></span></p>
+        </div>
+
         <div class="tuning-controls">
           <button id="showSurfacePlotButton" class="active-view">📊 แสดงกราฟ 3D</button>
           <button id="showLinePlotButton">📈 แสดงกราฟ 2D</button>
           <button id="showTableButton">📝 แสดงตาราง</button>
+          <button id="resetMapValuesButton" class="btn danger">↩️ รีเซ็ตค่า Map</button>
         </div>
 
         <div id="mapChart" style="display: block;"></div>
+
         <div id="linePlotControls" style="display: none;">
             <label for="linePlotAxis">เลือกแกน:</label>
             <select id="linePlotAxis">
@@ -978,6 +1089,7 @@
             <input type="range" id="linePlotIndex" min="0" value="0">
             <span id="currentLinePlotIndex">0</span>
         </div>
+
         <div id="editableMapTableContainer" style="display: none;"></div>
       </div>
     </div>
@@ -985,8 +1097,15 @@
 
   <script>
     // --- Utility Functions (Helpers) ---
-    const hexToDec = (hex) => parseInt(hex, 16);
-    const decToHex = (dec) => '0x' + dec.toString(16).toUpperCase().padStart(4, '0');
+    const hexToDec = (hex) => {
+        if (!hex) return null;
+        let val = hex.startsWith('0x') ? parseInt(hex.substring(2), 16) : parseInt(hex, 10);
+        return isNaN(val) ? null : val;
+    };
+    const decToHex = (dec) => {
+        if (dec === null || isNaN(dec)) return '';
+        return '0x' + dec.toString(16).toUpperCase().padStart(8, '0'); // Pad to 8 chars for full offset
+    };
 
     function bytesToHex(bytes) {
       return Array.from(bytes)
@@ -1001,23 +1120,30 @@
     }
 
     // --- Global State Variables ---
-    let currentView = 'upload';
-    let currentBinFile = null;
-    let rawBinData = null;
+    let currentBinFile = null; // Stores the File object
+    let rawBinData = null; // Stores Uint8Array of the bin file
     let fileSize = 0;
-    let userDefinedMaps = [];
-    let currentAnalyzedMapData = null;
-    let currentAnalyzedMapInfo = null;
+
+    let userDefinedMaps = []; // User-added map definitions (will be saved to localStorage)
+
+    // Current map data being displayed/edited
+    let currentAnalyzedMapData = null; // Map data (2D array of real values)
+    let currentAnalyzedMapInfo = null; // Metadata of the map being analyzed (from user-defined)
+    let initialMapDataSnapshot = null; // Snapshot of the map data when first analyzed, for reset
+
+    // Hex Viewer Selection State
     let hexSelectionStart = null;
     let hexSelectionEnd = null;
+    let isHexDragging = false; // Flag for mouse drag selection
     const BYTES_PER_HEX_ROW = 16;
-    const MAX_HEX_VIEW_ROWS = 2000;
-    let isHexDragging = false;
+    const MAX_HEX_VIEW_ROWS = 2000; // Limit rendering for performance (approx 32KB)
+
+    // Unsaved changes state
     let hasUnsavedChanges = false;
-    let initialMapDataSnapshot = null;
 
     // --- DOM Elements ---
     const elements = {
+      // Navigation
       navUploadFile: document.getElementById("navUploadFile"),
       navHexView: document.getElementById("navHexView"),
       navMapDefinitions: document.getElementById("navMapDefinitions"),
@@ -1025,35 +1151,52 @@
       saveTunedFileButton: document.getElementById("saveTunedFileButton"),
       saveStatus: document.getElementById("saveStatus"),
 
+      // Sections
       uploadSection: document.getElementById("uploadSection"),
       hexViewSection: document.getElementById("hexViewSection"),
       mapDefinitionsSection: document.getElementById("mapDefinitionsSection"),
       analyzeTuneSection: document.getElementById("analyzeTuneSection"),
 
+      // Upload Section
       binFileInput: document.getElementById("binFile"),
+      uploadForm: document.getElementById("uploadForm"),
       uploadFileButton: document.getElementById("uploadFileButton"),
       analyzeInitialSpinner: document.getElementById("analyzeInitialSpinner"),
+      fileUploadStatus: document.getElementById("fileUploadStatus"),
       glossaryDiv: document.getElementById("glossary"),
 
+      // Hex Viewer Section
       hexViewerDiv: document.getElementById("hexViewer"),
-      hexSelectionStartSpan: document.getElementById("selectedHexRangeStart"),
-      hexSelectionEndSpan: document.getElementById("selectedHexRangeEnd"),
-      hexSelectionDecStart: document.getElementById("selectedHexDecStart"),
-      hexSelectionDecEnd: document.getElementById("selectedHexDecEnd"),
-      hexSelectionSize: document.getElementById("selectedHexSize"),
+      selectedHexRangeStart: document.getElementById("selectedHexRangeStart"),
+      selectedHexRangeEnd: document.getElementById("selectedHexRangeEnd"),
+      selectedHexDecStart: document.getElementById("selectedHexDecStart"),
+      selectedHexDecEnd: document.getElementById("selectedHexDecEnd"),
+      selectedHexSize: document.getElementById("selectedHexSize"),
       defineMapFromSelectionButton: document.getElementById("defineMapFromSelection"),
 
+      // Map Definitions Section
       mapDefinitionForm: document.getElementById("mapDefinitionForm"),
+      mapDefinitionStatus: document.getElementById("mapDefinitionStatus"),
       userDefinedMapsList: document.getElementById("userDefinedMapsList").querySelector("ul"),
 
+      // Analyze/Tune Section
       selectAnalyzeMapDropdown: document.getElementById("selectAnalyzeMap"),
       analyzeSelectedMapButton: document.getElementById("analyzeSelectedMapButton"),
       analyzeSelectedSpinner: document.getElementById("analyzeSelectedSpinner"),
+      analysisStatus: document.getElementById("analysisStatus"),
+
       mapDisplayArea: document.getElementById("mapDisplayArea"),
+      analyzedMapDisplayName: document.getElementById("analyzedMapDisplayName"),
+      analyzedMapOffset: document.getElementById("analyzedMapOffset"),
+      analyzedMapSize: document.getElementById("analyzedMapSize"),
+      analyzedMapUnit: document.getElementById("analyzedMapUnit"),
+      analyzedXAxisOffset: document.getElementById("analyzedXAxisOffset"),
+      analyzedYAxisOffset: document.getElementById("analyzedYAxisOffset"),
 
       showSurfacePlotButton: document.getElementById("showSurfacePlotButton"),
       showLinePlotButton: document.getElementById("showLinePlotButton"),
       showTableButton: document.getElementById("showTableButton"),
+      resetMapValuesButton: document.getElementById("resetMapValuesButton"),
       mapChartDiv: document.getElementById("mapChart"),
       editableMapTableContainer: document.getElementById("editableMapTableContainer"),
 
@@ -1065,138 +1208,161 @@
 
     // --- View Management ---
     function showSection(sectionId) {
-      // Check for unsaved changes
-      if (currentView === 'analyze' && hasUnsavedChanges && sectionId !== 'analyzeTuneSection') {
-        if (!confirm('คุณมีการเปลี่ยนแปลงที่ยังไม่ได้บันทึกในแผนที่ปัจจุบัน หากออกจากหน้านี้ การเปลี่ยนแปลงจะหายไป\n\nออกจากหน้านี้หรือไม่?')) {
-          return;
+        // Check for unsaved changes before switching away from analyze section
+        if (currentAnalyzedMapData && hasUnsavedChanges && elements.analyzeTuneSection.style.display === 'block' && sectionId !== 'analyzeTuneSection') {
+            if (!confirm('คุณมีการเปลี่ยนแปลงที่ยังไม่ได้บันทึกในแผนที่ปัจจุบัน หากออกจากหน้านี้ การเปลี่ยนแปลงจะหายไป\n\nดำเนินการต่อหรือไม่?')) {
+                return; // User cancelled, stay on current section
+            }
+            hasUnsavedChanges = false; // User confirmed to discard changes
+            updateSaveStatus();
         }
-      }
-      
-      const sections = [
-        elements.uploadSection,
-        elements.hexViewSection,
-        elements.mapDefinitionsSection,
-        elements.analyzeTuneSection
-      ];
-      
-      sections.forEach(sec => {
-        sec.style.display = 'none';
-        if (sec.id === sectionId) {
-          sec.style.display = 'block';
-        }
-      });
+        
+        const sections = [
+            elements.uploadSection,
+            elements.hexViewSection,
+            elements.mapDefinitionsSection,
+            elements.analyzeTuneSection
+        ];
+        sections.forEach(sec => {
+            sec.style.display = 'none';
+            if (sec.id === sectionId) {
+                sec.style.display = 'block';
+            }
+        });
 
-      const navButtons = [
-        elements.navUploadFile,
-        elements.navHexView,
-        elements.navMapDefinitions,
-        elements.navAnalyzeMap
-      ];
-      
-      navButtons.forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.id.includes(sectionId.replace('Section', ''))) {
-          btn.classList.add('active');
-        }
-      });
-      
-      currentView = sectionId.replace('Section', '');
+        const navButtons = [
+            elements.navUploadFile,
+            elements.navHexView,
+            elements.navMapDefinitions,
+            elements.navAnalyzeMap
+        ];
+        navButtons.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.id.includes(sectionId.replace('Section', ''))) {
+                btn.classList.add('active');
+            }
+        });
     }
 
     function toggleLoadingSpinner(spinnerElement, show) {
-      spinnerElement.style.display = show ? 'inline-block' : 'none';
+        spinnerElement.style.display = show ? 'inline-block' : 'none';
     }
 
     function updateNavButtonsState() {
-      const fileLoaded = !!currentBinFile;
-      elements.navHexView.disabled = !fileLoaded;
-      elements.navMapDefinitions.disabled = !fileLoaded;
-      elements.navAnalyzeMap.disabled = !fileLoaded;
-      elements.saveTunedFileButton.disabled = !fileLoaded || !currentAnalyzedMapData;
+        const fileLoaded = !!currentBinFile;
+        elements.navHexView.disabled = !fileLoaded;
+        elements.navMapDefinitions.disabled = !fileLoaded;
+        elements.navAnalyzeMap.disabled = !fileLoaded;
+        // Save button depends on file loaded AND a map being analyzed/modified
+        elements.saveTunedFileButton.disabled = !fileLoaded || !currentAnalyzedMapData;
+        updateSaveStatus(); // Update save status text
     }
-    
+
+    // Function to display status messages consistently
+    function displayStatus(element, message, type = 'info') { // type: 'success', 'error', 'info'
+        console.log(`[displayStatus] Element: ${element.id}, Type: ${type}, Message: ${message}`); // Debug log
+        element.textContent = message;
+        element.className = `status-message ${type}`;
+        // Clear after a few seconds unless it's an error
+        if (type !== 'error') {
+            setTimeout(() => {
+                element.textContent = '';
+                element.className = 'status-message';
+            }, 5000);
+        }
+    }
+
+    // Function to update the save status text/color
     function updateSaveStatus() {
-      if (!currentAnalyzedMapData) {
-        elements.saveStatus.textContent = '';
-        elements.saveStatus.className = 'save-status';
-        return;
-      }
-      
-      if (hasUnsavedChanges) {
-        elements.saveStatus.textContent = 'มีเปลี่ยนแปลงที่ยังไม่ได้บันทึก';
-        elements.saveStatus.className = 'save-status unsaved-changes';
-      } else {
-        elements.saveStatus.textContent = 'บันทึกแล้ว';
-        elements.saveStatus.className = 'save-status saved';
-      }
+        if (!currentAnalyzedMapData) {
+            elements.saveStatus.textContent = '';
+            elements.saveStatus.className = 'save-status';
+            return;
+        }
+        
+        if (hasUnsavedChanges) {
+            elements.saveStatus.textContent = 'มีเปลี่ยนแปลงที่ยังไม่ได้บันทึก';
+            elements.saveStatus.className = 'save-status unsaved-changes';
+        } else {
+            elements.saveStatus.textContent = 'บันทึกแล้ว';
+            elements.saveStatus.className = 'save-status saved';
+        }
     }
 
     // --- Initial Setup ---
     document.addEventListener("DOMContentLoaded", () => {
-      showSection('uploadSection');
-      loadUserDefinedMapsFromStorage();
-      populateMapDropdowns();
-      updateNavButtonsState();
-      updateSaveStatus();
+        showSection('uploadSection');
+        loadUserDefinedMapsFromStorage();
+        populateMapDropdowns();
+        updateNavButtonsState();
     });
 
     // --- Navigation Event Listeners ---
     elements.navUploadFile.addEventListener('click', () => showSection('uploadSection'));
     elements.navHexView.addEventListener('click', () => {
-      showSection('hexViewSection');
-      if (rawBinData) {
-        renderHexViewer(rawBinData, fileSize);
-      }
+        showSection('hexViewSection');
+        if (rawBinData) {
+            renderHexViewer(rawBinData, fileSize);
+        }
     });
     elements.navMapDefinitions.addEventListener('click', () => {
-      showSection('mapDefinitionsSection');
-      renderUserDefinedMapsList();
+        showSection('mapDefinitionsSection');
+        renderUserDefinedMapsList(); // Re-render list when navigating to it
     });
     elements.navAnalyzeMap.addEventListener('click', () => {
-      showSection('analyzeTuneSection');
-      if (currentAnalyzedMapData) {
-        renderCurrentChartView();
-      } else {
-        elements.mapDisplayArea.style.display = 'none';
-      }
+        showSection('analyzeTuneSection');
+        if (currentAnalyzedMapData) {
+            renderCurrentChartView(); // Re-render chart/table if already analyzed
+        } else {
+            elements.mapDisplayArea.style.display = 'none'; // Hide map display if no map is loaded
+        }
     });
 
     // --- Upload File Logic ---
     elements.uploadForm.addEventListener("submit", async function (e) {
-      e.preventDefault();
-      elements.uploadFileButton.disabled = true;
-      elements.saveTunedFileButton.disabled = true;
-      toggleLoadingSpinner(elements.analyzeInitialSpinner, true);
+        e.preventDefault();
+        console.log("[UploadForm] Submit event triggered."); // Debug log
+        elements.uploadFileButton.disabled = true;
+        elements.saveTunedFileButton.disabled = true;
+        toggleLoadingSpinner(elements.analyzeInitialSpinner, true);
+        displayStatus(elements.fileUploadStatus, 'กำลังอัปโหลดไฟล์...');
 
-      const file = elements.binFileInput.files[0];
-      currentBinFile = file;
+        const file = elements.binFileInput.files[0];
+        console.log("[UploadForm] Selected file:", file); // Debug log
 
-      if (!file) {
-        alert("❌ กรุณาเลือกไฟล์ .bin");
-        elements.uploadFileButton.disabled = false;
-        toggleLoadingSpinner(elements.analyzeInitialSpinner, false);
-        return;
-      }
+        currentBinFile = file; // Store the original file globally
 
-      try {
-        const arrayBuffer = await file.arrayBuffer();
-        rawBinData = new Uint8Array(arrayBuffer);
-        fileSize = file.size;
-        updateNavButtonsState();
+        if (!file) {
+            displayStatus(elements.fileUploadStatus, "❌ กรุณาเลือกไฟล์ .bin", 'error');
+            elements.uploadFileButton.disabled = false;
+            toggleLoadingSpinner(elements.analyzeInitialSpinner, false);
+            return;
+        }
 
-        alert("✅ อัปโหลดไฟล์สำเร็จ! ตอนนี้คุณสามารถดู Hex หรือกำหนดแผนที่ได้");
-        showSection('hexViewSection');
-        renderHexViewer(rawBinData, fileSize);
-      } catch (err) {
-        alert("❌ เกิดข้อผิดพลาดในการอ่านไฟล์: " + err.message);
-      } finally {
-        elements.uploadFileButton.disabled = false;
-        toggleLoadingSpinner(elements.analyzeInitialSpinner, false);
-      }
+        // Read file into Uint8Array for local Hex Viewer
+        try {
+            console.log("[UploadForm] Reading file as ArrayBuffer..."); // Debug log
+            const arrayBuffer = await file.arrayBuffer();
+            rawBinData = new Uint8Array(arrayBuffer);
+            fileSize = file.size;
+            console.log("[UploadForm] File read complete. File size:", fileSize, "bytes."); // Debug log
+            updateNavButtonsState(); // Enable other nav buttons
+
+            displayStatus(elements.fileUploadStatus, `✅ อัปโหลดไฟล์ '${file.name}' (${(fileSize / 1024 / 1024).toFixed(2)} MB) สำเร็จ! ตอนนี้คุณสามารถดู Hex หรือกำหนดแผนที่ได้`, 'success');
+            showSection('hexViewSection'); // Go to Hex View after successful upload
+            renderHexViewer(rawBinData, fileSize);
+        } catch (error) {
+            console.error("[UploadForm] Error reading file:", error); // Debug log
+            displayStatus(elements.fileUploadStatus, `❌ เกิดข้อผิดพลาดในการอ่านไฟล์: ${error.message}`, 'error');
+        } finally {
+            elements.uploadFileButton.disabled = false;
+            toggleLoadingSpinner(elements.analyzeInitialSpinner, false);
+        }
     });
 
     // --- Hex Viewer Logic ---
     function renderHexViewer(data, size) {
+        console.log("[HexViewer] Rendering Hex Viewer. Data length:", data.length, "bytes."); // Debug log
         elements.hexViewerDiv.innerHTML = `
           <p>ขนาดไฟล์: ${size} ไบต์ (0x${size.toString(16).toUpperCase()})</p>
           <div class="hex-content-inner"></div>
@@ -1256,18 +1422,26 @@
             elements.hexViewerDiv.querySelector('.truncated-message').style.display = 'none';
         }
         
-        // Add mouseup event to stop dragging
-        document.addEventListener('mouseup', () => {
-          isHexDragging = false;
-        });
+        // Add mouseup event to stop dragging on the document
+        document.removeEventListener('mouseup', stopHexDragging); // Remove previous listener to prevent duplicates
+        document.addEventListener('mouseup', stopHexDragging);
         
         updateHexSelectionDisplay();
     }
 
+    function stopHexDragging() {
+        isHexDragging = false;
+    }
+
     function updateHexSelectionDisplay() {
       const allHexBytes = elements.hexViewerDiv.querySelectorAll('.hex-byte');
-      let minOffset = Math.min(selectedHexStartOffset, selectedHexEndOffset);
-      let maxOffset = Math.max(selectedHexStartOffset, selectedHexEndOffset);
+      let minOffset = selectedHexStartOffset;
+      let maxOffset = selectedHexEndOffset;
+
+      if (selectedHexStartOffset !== null && selectedHexEndOffset !== null) {
+          minOffset = Math.min(selectedHexStartOffset, selectedHexEndOffset);
+          maxOffset = Math.max(selectedHexStartOffset, selectedHexEndOffset);
+      }
       
       allHexBytes.forEach(span => {
         const offset = parseInt(span.dataset.offset);
@@ -1280,21 +1454,21 @@
       });
 
       if (selectedHexStartOffset !== null && selectedHexEndOffset !== null) {
-        elements.hexSelectionStartSpan.textContent = minOffset.toString(16).toUpperCase().padStart(8, '0');
-        elements.hexSelectionEndSpan.textContent = maxOffset.toString(16).toUpperCase().padStart(8, '0');
-        elements.hexSelectionDecStart.textContent = minOffset;
-        elements.hexSelectionDecEnd.textContent = maxOffset;
+        elements.selectedHexRangeStart.textContent = minOffset.toString(16).toUpperCase().padStart(8, '0');
+        elements.selectedHexRangeEnd.textContent = maxOffset.toString(16).toUpperCase().padStart(8, '0');
+        elements.selectedHexDecStart.textContent = minOffset;
+        elements.selectedHexDecEnd.textContent = maxOffset;
         
         const size = maxOffset - minOffset + 1;
-        elements.hexSelectionSize.textContent = size;
+        elements.selectedHexSize.textContent = size;
         
         elements.defineMapFromSelectionButton.disabled = false;
       } else {
-        elements.hexSelectionStartSpan.textContent = '0';
-        elements.hexSelectionEndSpan.textContent = '0';
-        elements.hexSelectionDecStart.textContent = '0';
-        elements.hexSelectionDecEnd.textContent = '0';
-        elements.hexSelectionSize.textContent = '0';
+        elements.selectedHexRangeStart.textContent = '0';
+        elements.selectedHexRangeEnd.textContent = '0';
+        elements.selectedHexDecStart.textContent = '0';
+        elements.selectedHexDecEnd.textContent = '0';
+        elements.selectedHexSize.textContent = '0';
         elements.defineMapFromSelectionButton.disabled = true;
       }
     }
@@ -1308,587 +1482,742 @@
         const form = elements.mapDefinitionForm;
         form.querySelector('[name="block"]').value = decToHex(minOffset);
 
-        // Calculate approximate rows/cols
-        let defaultCols = 16;
-        let defaultRows = Math.ceil(size / (defaultCols * 2));
-        
-        if (size % (defaultCols * 1) === 0) {
-          defaultRows = size / (defaultCols * 1);
-          form.querySelector('[name="dataType"]').value = '8bit';
-        } else if (size % (defaultCols * 2) === 0) {
-          defaultRows = size / (defaultCols * 2);
-          form.querySelector('[name="dataType"]').value = '16bit';
+        // Heuristic for default rows/cols
+        let defaultRows = 1;
+        let defaultCols = size;
+        let defaultDataType = '8bit';
+
+        // Try to guess 16-bit first
+        if (size % 2 === 0) {
+            const potential16bitCols = size / 2;
+            if (potential16bitCols >= 1 && potential16bitCols <= 100) { // Check reasonable range
+                defaultCols = potential16bitCols;
+                defaultRows = 1;
+                defaultDataType = '16bit';
+            }
         }
-        
+        // Then try common 8-bit columns (e.g., 16, 8)
+        if (size % 16 === 0) {
+            defaultCols = 16;
+            defaultRows = size / 16;
+            defaultDataType = '8bit';
+        } else if (size % 8 === 0) {
+            defaultCols = 8;
+            defaultRows = size / 8;
+            defaultDataType = '8bit';
+        } else if (size % 4 === 0) { // Try 4 columns for smaller maps
+            defaultCols = 4;
+            defaultRows = size / 4;
+            defaultDataType = '8bit';
+        }
+
+
         form.querySelector('[name="rows"]').value = defaultRows;
         form.querySelector('[name="cols"]').value = defaultCols;
+        form.querySelector('[name="dataType"]').value = defaultDataType;
+        // Trigger change to update endianness dropdown state
+        form.querySelector('[name="dataType"]').dispatchEvent(new Event('change'));
 
         showSection('mapDefinitionsSection');
         selectedHexStartOffset = null;
         selectedHexEndOffset = null;
         updateHexSelectionDisplay();
+        displayStatus(elements.mapDefinitionStatus, `นำ Offset 0x${minOffset.toString(16).toUpperCase()} จาก Hex Viewer มาใช้`, 'info');
       }
     });
+
 
     // --- Map Definition Form Logic ---
     function saveUserDefinedMapsToStorage() {
-      localStorage.setItem('userDefinedMaps', JSON.stringify(userDefinedMaps));
+        localStorage.setItem('userDefinedMaps', JSON.stringify(userDefinedMaps));
     }
 
     function loadUserDefinedMapsFromStorage() {
-      const storedMaps = localStorage.getItem('userDefinedMaps');
-      if (storedMaps) {
-        userDefinedMaps = JSON.parse(storedMaps);
-      }
+        const storedMaps = localStorage.getItem('userDefinedMaps');
+        if (storedMaps) {
+            userDefinedMaps = JSON.parse(storedMaps);
+        }
     }
 
     function populateMapDropdowns() {
-      elements.selectAnalyzeMapDropdown.innerHTML = '';
-      const defaultOption = document.createElement('option');
-      defaultOption.value = '';
-      defaultOption.innerText = '-- เลือกแผนที่เพื่อวิเคราะห์ --';
-      elements.selectAnalyzeMapDropdown.appendChild(defaultOption);
+        elements.selectAnalyzeMapDropdown.innerHTML = '';
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.innerText = '-- เลือกแผนที่เพื่อวิเคราะห์ --';
+        elements.selectAnalyzeMapDropdown.appendChild(defaultOption);
 
-      userDefinedMaps.forEach(mapDef => {
-        const option = document.createElement('option');
-        option.value = mapDef.name;
-        option.innerText = `[Custom] ${mapDef.displayName || mapDef.name}`;
-        elements.selectAnalyzeMapDropdown.appendChild(option);
-      });
+        userDefinedMaps.forEach(mapDef => {
+            const option = document.createElement('option');
+            option.value = mapDef.name;
+            option.innerText = `${mapDef.displayName || mapDef.name} (0x${mapDef.block.toString(16).toUpperCase()})`;
+            elements.selectAnalyzeMapDropdown.appendChild(option);
+        });
     }
 
     function renderUserDefinedMapsList() {
-      elements.userDefinedMapsList.innerHTML = '';
-      
-      if (userDefinedMaps.length === 0) {
-        elements.userDefinedMapsList.innerHTML = '<p>ยังไม่มีแผนที่ที่กำหนดเอง</p>';
-        return;
-      }
-      
-      userDefinedMaps.forEach(mapDef => {
-        const li = document.createElement('li');
-        li.innerHTML = `
-          <div>
-            <span><strong>${mapDef.displayName || mapDef.name}</strong></span>
-            <div class="map-details">${mapDef.rows}x${mapDef.cols} @ ${decToHex(mapDef.block)}, ปัจจัย: ${mapDef.factor}, Offset: ${mapDef.offset}</div>
-          </div>
-          <div>
-            <button class="analyze-btn" data-map-name="${mapDef.name}">📊 วิเคราะห์</button>
-            <button class="delete-btn" data-map-name="${mapDef.name}">🗑️ ลบ</button>
-          </div>
-        `;
-        elements.userDefinedMapsList.appendChild(li);
-      });
-
-      // Add event listeners for analyze and delete buttons
-      elements.userDefinedMapsList.querySelectorAll('.analyze-btn').forEach(button => {
-        button.addEventListener('click', async (e) => {
-          const mapName = e.target.dataset.mapName;
-          const mapDef = userDefinedMaps.find(m => m.name === mapName);
-          if (mapDef) {
-            elements.selectAnalyzeMapDropdown.value = mapName;
-            await analyzeAndRenderMap(mapDef);
-            showSection('analyzeTuneSection');
-          }
+        elements.userDefinedMapsList.innerHTML = '';
+        if (userDefinedMaps.length === 0) {
+            elements.userDefinedMapsList.innerHTML = '<p>ยังไม่มีแผนที่ที่กำหนดเอง</p>';
+            return;
+        }
+        userDefinedMaps.forEach(mapDef => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <div>
+                    <span><strong>${mapDef.displayName || mapDef.name}</strong></span>
+                    <div class="map-details">${mapDef.rows}x${mapDef.cols} @ ${decToHex(mapDef.block)}, Factor: ${mapDef.factor}, Offset: ${mapDef.offset}</div>
+                    ${mapDef.unit ? `<div class="map-details">หน่วย: ${mapDef.unit}</div>` : ''}
+                </div>
+                <div>
+                    <button class="analyze-btn" data-map-name="${mapDef.name}">📊 วิเคราะห์</button>
+                    <button class="delete-btn" data-map-name="${mapDef.name}">🗑️ ลบ</button>
+                </div>
+            `;
+            elements.userDefinedMapsList.appendChild(li);
         });
-      });
 
-      elements.userDefinedMapsList.querySelectorAll('.delete-btn').forEach(button => {
-        button.addEventListener('click', (e) => {
-          const mapName = e.target.dataset.mapName;
-          if (confirm(`คุณแน่ใจหรือไม่ที่ต้องการลบแผนที่ "${mapName}"?`)) {
-            userDefinedMaps = userDefinedMaps.filter(m => m.name !== mapName);
-            saveUserDefinedMapsToStorage();
-            populateMapDropdowns();
-            renderUserDefinedMapsList();
-            alert(`แผนที่ "${mapName}" ถูกลบแล้ว`);
-          }
+        elements.userDefinedMapsList.querySelectorAll('.analyze-btn').forEach(button => {
+            button.addEventListener('click', async (e) => {
+                const mapName = e.target.dataset.mapName;
+                const mapDef = userDefinedMaps.find(m => m.name === mapName);
+                if (mapDef) {
+                    elements.selectAnalyzeMapDropdown.value = mapName;
+                    await analyzeAndRenderMap(mapDef);
+                    showSection('analyzeTuneSection');
+                }
+            });
         });
-      });
+
+        elements.userDefinedMapsList.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const mapName = e.target.dataset.mapName;
+                if (confirm(`คุณแน่ใจหรือไม่ที่ต้องการลบแผนที่ "${mapName}"?`)) {
+                    userDefinedMaps = userDefinedMaps.filter(m => m.name !== mapName);
+                    saveUserDefinedMapsToStorage();
+                    populateMapDropdowns();
+                    renderUserDefinedMapsList();
+                    displayStatus(elements.mapDefinitionStatus, `แผนที่ "${mapName}" ถูกลบแล้ว`, 'success');
+                }
+            });
+        });
     }
 
     elements.mapDefinitionForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      const formData = new FormData(this);
-      const newMapDef = {};
-      
-      for (let [key, value] of formData.entries()) {
-        newMapDef[key] = value;
-      }
+        e.preventDefault();
+        const formData = new FormData(this);
+        const newMapDef = {};
+        for (let [key, value] of formData.entries()) {
+            newMapDef[key] = value;
+        }
 
-      // Validate and convert types
-      try {
-        // Convert hex to dec if needed
-        if (newMapDef.block.startsWith('0x')) {
-          newMapDef.block = hexToDec(newMapDef.block.substring(2));
-        } else {
-          newMapDef.block = parseInt(newMapDef.block);
+        // Basic Frontend Validation
+        if (!newMapDef.name.trim() || !newMapDef.block.trim() || !newMapDef.rows.trim() || !newMapDef.cols.trim()) {
+            displayStatus(elements.mapDefinitionStatus, '❌ กรุณากรอก "ชื่อแผนที่", "Offset แผนที่", "จำนวนแถว", "จำนวนคอลัมน์" ให้ครบถ้วน', 'error');
+            return;
         }
-        
-        newMapDef.rows = parseInt(newMapDef.rows);
-        newMapDef.cols = parseInt(newMapDef.cols);
-        newMapDef.factor = parseFloat(newMapDef.factor);
-        newMapDef.offset = parseFloat(newMapDef.offset);
-        newMapDef.xScale = parseFloat(newMapDef.xScale);
-        newMapDef.yScale = parseFloat(newMapDef.yScale);
-        
-        // Axis offsets
-        if (newMapDef.xAxisOffset) {
-          if (newMapDef.xAxisOffset.startsWith('0x')) {
-            newMapDef.xAxisOffset = hexToDec(newMapDef.xAxisOffset.substring(2));
-          } else {
-            newMapDef.xAxisOffset = parseInt(newMapDef.xAxisOffset);
-          }
-        } else {
-          newMapDef.xAxisOffset = null;
-        }
-        
-        if (newMapDef.yAxisOffset) {
-          if (newMapDef.yAxisOffset.startsWith('0x')) {
-            newMapDef.yAxisOffset = hexToDec(newMapDef.yAxisOffset.substring(2));
-          } else {
-            newMapDef.yAxisOffset = parseInt(newMapDef.yAxisOffset);
-          }
-        } else {
-          newMapDef.yAxisOffset = null;
-        }
-        
-        // Validate against file size
-        if (newMapDef.block < 0 || newMapDef.block >= fileSize) {
-          throw new Error(`Offset แผนที่อยู่นอกช่วงไฟล์ (0-${fileSize-1})`);
-        }
-        
-        const bytesPerValue = newMapDef.dataType === '8bit' ? 1 : 2;
-        const mapSize = newMapDef.rows * newMapDef.cols * bytesPerValue;
-        
-        if (newMapDef.block + mapSize > fileSize) {
-          throw new Error(`แผนที่นี้ต้องการ ${mapSize} ไบต์ แต่มีพื้นที่เพียง ${fileSize - newMapDef.block} ไบต์`);
-        }
-        
-      } catch (error) {
-        alert('❌ ข้อผิดพลาด: ' + error.message);
-        return;
-      }
 
-      // Assign type and display properties
-      newMapDef.type = newMapDef.name;
-      newMapDef.displayName = newMapDef.displayName || newMapDef.name;
-      newMapDef.size = [newMapDef.rows, newMapDef.cols];
+        // Validate and convert types
+        try {
+            newMapDef.block = hexToDec(newMapDef.block);
+            if (newMapDef.block === null) throw new Error("Invalid Block Offset (ต้องเป็น Hex หรือ Decimal)");
 
-      // Check if map exists
-      const existingIndex = userDefinedMaps.findIndex(m => m.name === newMapDef.name);
-      
-      if (existingIndex > -1) {
-        if (confirm(`แผนที่ "${newMapDef.name}" มีอยู่แล้ว คุณต้องการอัปเดตหรือไม่?`)) {
-          userDefinedMaps[existingIndex] = newMapDef;
-          alert(`✅ แผนที่ "${newMapDef.name}" ถูกอัปเดตแล้ว`);
-        } else {
-          return;
+            newMapDef.rows = parseInt(newMapDef.rows);
+            if (isNaN(newMapDef.rows) || newMapDef.rows < 1) throw new Error("Invalid Rows (ต้องเป็นตัวเลขมากกว่า 0)");
+
+            newMapDef.cols = parseInt(newMapDef.cols);
+            if (isNaN(newMapDef.cols) || newMapDef.cols < 1) throw new Error("Invalid Cols (ต้องเป็นตัวเลขมากกว่า 0)");
+
+            newMapDef.factor = parseFloat(newMapDef.factor);
+            if (isNaN(newMapDef.factor)) throw new Error("Invalid Factor (ต้องเป็นตัวเลข)");
+            
+            newMapDef.offset = parseFloat(newMapDef.offset);
+            if (isNaN(newMapDef.offset)) throw new Error("Invalid Offset Value (ต้องเป็นตัวเลข)");
+
+            newMapDef.xScale = parseFloat(newMapDef.xScale);
+            if (isNaN(newMapDef.xScale)) throw new Error("Invalid X Scale (ต้องเป็นตัวเลข)");
+
+            newMapDef.yScale = parseFloat(newMapDef.yScale);
+            if (isNaN(newMapDef.yScale)) throw new Error("Invalid Y Scale (ต้องเป็นตัวเลข)");
+
+            newMapDef.xAxisOffset = hexToDec(newMapDef.xAxisOffset); // Can be null
+            newMapDef.yAxisOffset = hexToDec(newMapDef.yAxisOffset); // Can be null
+
+            // Ensure endianness is set for 16bit, and handle 'inherit'
+            if (newMapDef.dataType === '16bit' && (!newMapDef.endian || newMapDef.endian === '')) {
+                newMapDef.endian = '<H'; // Default to Little-endian if not set
+            } else if (newMapDef.dataType === '8bit') {
+                newMapDef.endian = ''; // Clear endian for 8bit
+            }
+
+            // Handle axis data types and endianness inheritance
+            if (newMapDef.xAxisDataType === 'inherit') {
+                newMapDef.xAxisDataType = newMapDef.dataType;
+                newMapDef.xAxisEndian = newMapDef.endian;
+            } else if (newMapDef.xAxisDataType === '16bit' && (!newMapDef.xAxisEndian || newMapDef.xAxisEndian === 'inherit')) {
+                newMapDef.xAxisEndian = newMapDef.endian; // Inherit from map if not specified
+            } else if (newMapDef.xAxisDataType === '8bit') {
+                newMapDef.xAxisEndian = ''; // Clear endian for 8bit axis
+            }
+
+            if (newMapDef.yAxisDataType === 'inherit') {
+                newMapDef.yAxisDataType = newMapDef.dataType;
+                newMapDef.yAxisEndian = newMapDef.endian;
+            } else if (newMapDef.yAxisDataType === '16bit' && (!newMapDef.yAxisEndian || newMapDef.yAxisEndian === 'inherit')) {
+                newMapDef.yAxisEndian = newMapDef.endian; // Inherit from map if not specified
+            } else if (newMapDef.yAxisDataType === '8bit') {
+                newMapDef.yAxisEndian = ''; // Clear endian for 8bit axis
+            }
+
+            // Validate against file size if file is loaded
+            if (rawBinData) {
+                if (newMapDef.block < 0 || newMapDef.block >= fileSize) {
+                    throw new Error(`Offset แผนที่ (0x${newMapDef.block.toString(16).toUpperCase()}) อยู่นอกช่วงไฟล์ (0x0 - 0x${(fileSize-1).toString(16).toUpperCase()})`);
+                }
+                
+                const bytesPerValue = newMapDef.dataType === '8bit' ? 1 : 2;
+                const mapDataSize = newMapDef.rows * newMapDef.cols * bytesPerValue;
+                
+                if (newMapDef.block + mapDataSize > fileSize) {
+                    throw new Error(`แผนที่นี้ต้องการ ${mapDataSize} ไบต์ (Offset 0x${newMapDef.block.toString(16).toUpperCase()} ถึง 0x${(newMapDef.block + mapDataSize - 1).toString(16).toUpperCase()}) แต่ไฟล์มีขนาดเพียง 0x${fileSize.toString(16).toUpperCase()} ไบต์`);
+                }
+                // Also check axis offsets if provided
+                if (newMapDef.xAxisOffset !== null) {
+                    const xAxisBytesPerValue = newMapDef.xAxisDataType === '8bit' ? 1 : 2;
+                    const xAxisSize = newMapDef.cols * xAxisBytesPerValue;
+                    if (newMapDef.xAxisOffset < 0 || newMapDef.xAxisOffset + xAxisSize > fileSize) {
+                        throw new Error(`Offset แกน X (0x${newMapDef.xAxisOffset.toString(16).toUpperCase()}) อยู่นอกช่วงไฟล์`);
+                    }
+                }
+                if (newMapDef.yAxisOffset !== null) {
+                    const yAxisBytesPerValue = newMapDef.yAxisDataType === '8bit' ? 1 : 2;
+                    const yAxisSize = newMapDef.rows * yAxisBytesPerValue;
+                    if (newMapDef.yAxisOffset < 0 || newMapDef.yAxisOffset + yAxisSize > fileSize) {
+                        throw new Error(`Offset แกน Y (0x${newMapDef.yAxisOffset.toString(16).toUpperCase()}) อยู่นอกช่วงไฟล์`);
+                    }
+                }
+            }
+            
+        } catch (error) {
+            displayStatus(elements.mapDefinitionStatus, `❌ ข้อผิดพลาดในการแปลง/ตรวจสอบข้อมูล: ${error.message}`, 'error');
+            return;
         }
-      } else {
-        userDefinedMaps.push(newMapDef);
-        alert(`✅ แผนที่ "${newMapDef.name}" ถูกบันทึกแล้ว`);
-      }
 
-      saveUserDefinedMapsToStorage();
-      populateMapDropdowns();
-      renderUserDefinedMapsList();
-      this.reset();
+        // Assign type and display properties
+        newMapDef.type = newMapDef.name; // Use name as unique type for custom maps
+        newMapDef.displayName = newMapDef.displayName.trim() || newMapDef.name;
+        // We don't store size array here, Backend will calculate it based on rows/cols
+
+        // Check if map with same name already exists
+        const existingIndex = userDefinedMaps.findIndex(m => m.name === newMapDef.name);
+        if (existingIndex > -1) {
+            if (confirm(`แผนที่ "${newMapDef.displayName}" มีอยู่แล้ว คุณต้องการอัปเดตหรือไม่?`)) {
+                userDefinedMaps[existingIndex] = newMapDef;
+                displayStatus(elements.mapDefinitionStatus, `✅ แผนที่ "${newMapDef.displayName}" ถูกอัปเดตแล้ว`, 'success');
+            } else {
+                return; // User cancelled update
+            }
+        } else {
+            userDefinedMaps.push(newMapDef);
+            displayStatus(elements.mapDefinitionStatus, `✅ แผนที่ "${newMapDef.displayName}" ถูกบันทึกแล้ว`, 'success');
+        }
+
+        saveUserDefinedMapsToStorage();
+        populateMapDropdowns(); // Update dropdowns
+        renderUserDefinedMapsList(); // Re-render list
+        this.reset(); // Clear form after successful save/update
+        // Reset endianness dropdowns to default inherit/disabled state
+        const dataTypeSelect = this.querySelector('[name="dataType"]');
+        dataTypeSelect.dispatchEvent(new Event('change'));
     });
+
+    // Event listener to enable/disable Endianness based on DataType selection in Map Definition Form
+    elements.mapDefinitionForm.querySelector('[name="dataType"]').addEventListener('change', function() {
+        const is16bit = this.value === '16bit';
+        elements.mapDefinitionForm.querySelector('[name="endian"]').disabled = !is16bit;
+        // Also update axis endianness dropdowns if they are set to inherit
+        elements.mapDefinitionForm.querySelector('[name="xAxisDataType"]').dispatchEvent(new Event('change'));
+        elements.mapDefinitionForm.querySelector('[name="yAxisDataType"]').dispatchEvent(new Event('change'));
+    });
+    elements.mapDefinitionForm.querySelector('[name="xAxisDataType"]').addEventListener('change', function() {
+        const mapDataTypeIs16bit = elements.mapDefinitionForm.querySelector('[name="dataType"]').value === '16bit';
+        const xAxisDataTypeSelected = this.value;
+        let disableEndian = true;
+        if (xAxisDataTypeSelected === '16bit') {
+            disableEndian = false;
+        } else if (xAxisDataTypeSelected === 'inherit' && mapDataTypeIs16bit) {
+            disableEndian = false;
+        }
+        elements.mapDefinitionForm.querySelector('[name="xAxisEndian"]').disabled = disableEndian;
+    });
+    elements.mapDefinitionForm.querySelector('[name="yAxisDataType"]').addEventListener('change', function() {
+        const mapDataTypeIs16bit = elements.mapDefinitionForm.querySelector('[name="dataType"]').value === '16bit';
+        const yAxisDataTypeSelected = this.value;
+        let disableEndian = true;
+        if (yAxisDataTypeSelected === '16bit') {
+            disableEndian = false;
+        } else if (yAxisDataTypeSelected === 'inherit' && mapDataTypeIs16bit) {
+            disableEndian = false;
+        }
+        elements.mapDefinitionForm.querySelector('[name="yAxisEndian"]').disabled = disableEndian;
+    });
+
+    // Trigger initial state for Endianness on load
+    elements.mapDefinitionForm.querySelector('[name="dataType"]').dispatchEvent(new Event('change'));
+
 
     // --- Analyze Selected Map Logic ---
     elements.analyzeSelectedMapButton.addEventListener('click', async () => {
-      const selectedMapName = elements.selectAnalyzeMapDropdown.value;
-      if (!selectedMapName) {
-        alert("❌ กรุณาเลือกแผนที่ที่จะวิเคราะห์");
-        return;
-      }
-      
-      if (!currentBinFile) {
-        alert("❌ กรุณาอัปโหลดไฟล์ .bin ก่อน");
-        showSection('uploadSection');
-        return;
-      }
+        const selectedMapName = elements.selectAnalyzeMapDropdown.value;
+        if (!selectedMapName) {
+            displayStatus(elements.analysisStatus, "❌ กรุณาเลือกแผนที่ที่จะวิเคราะห์", 'error');
+            return;
+        }
+        if (!currentBinFile) {
+            displayStatus(elements.analysisStatus, "❌ กรุณาอัปโหลดไฟล์ .bin ก่อน", 'error');
+            showSection('uploadSection');
+            return;
+        }
 
-      elements.analyzeSelectedMapButton.disabled = true;
-      toggleLoadingSpinner(elements.analyzeSelectedSpinner, true);
-      elements.mapDisplayArea.style.display = 'none';
+        elements.analyzeSelectedMapButton.disabled = true;
+        toggleLoadingSpinner(elements.analyzeSelectedSpinner, true);
+        elements.mapDisplayArea.style.display = 'none'; // Hide current display
+        displayStatus(elements.analysisStatus, 'กำลังวิเคราะห์แผนที่...');
 
-      const mapDefinitionToAnalyze = userDefinedMaps.find(def => def.name === selectedMapName);
+        const mapDefinitionToAnalyze = userDefinedMaps.find(def => def.name === selectedMapName);
 
-      if (!mapDefinitionToAnalyze) {
-        alert("❌ ไม่พบข้อมูลนิยามแผนที่สำหรับแผนที่ที่เลือก");
+        if (!mapDefinitionToAnalyze) {
+            displayStatus(elements.analysisStatus, "❌ ไม่พบข้อมูลนิยามแผนที่สำหรับแผนที่ที่เลือก", 'error');
+            elements.analyzeSelectedMapButton.disabled = false;
+            toggleLoadingSpinner(elements.analyzeSelectedSpinner, false);
+            return;
+        }
+
+        await analyzeAndRenderMap(mapDefinitionToAnalyze);
+
         elements.analyzeSelectedMapButton.disabled = false;
         toggleLoadingSpinner(elements.analyzeSelectedSpinner, false);
-        return;
-      }
-
-      await analyzeAndRenderMap(mapDefinitionToAnalyze);
-
-      elements.analyzeSelectedMapButton.disabled = false;
-      toggleLoadingSpinner(elements.analyzeSelectedSpinner, false);
     });
 
     async function analyzeAndRenderMap(mapDefinition) {
-      if (!currentBinFile) return;
-
-      // Simulate backend call with mock data
-      setTimeout(() => {
-        // Mock data for demonstration
-        currentAnalyzedMapData = [];
-        const rows = 16;
-        const cols = 12;
-        
-        for (let i = 0; i < rows; i++) {
-          const row = [];
-          for (let j = 0; j < cols; j++) {
-            // Generate some interesting surface data
-            const x = j / (cols - 1);
-            const y = i / (rows - 1);
-            const value = Math.sin(x * Math.PI * 2) * Math.cos(y * Math.PI) * 50 + 100;
-            row.push(parseFloat(value.toFixed(2)));
-          }
-          currentAnalyzedMapData.push(row);
+        if (!currentBinFile) {
+            displayStatus(elements.analysisStatus, "❌ ไม่มีไฟล์ .bin สำหรับวิเคราะห์", 'error');
+            return;
         }
-        
-        // Mock axis data
-        const xAxis = Array.from({length: cols}, (_, i) => i * 100);
-        const yAxis = Array.from({length: rows}, (_, i) => i * 250);
-        
-        currentAnalyzedMapInfo = {
-          type: mapDefinition.name,
-          display_name: mapDefinition.displayName || mapDefinition.name,
-          offset: mapDefinition.block,
-          x_axis: xAxis,
-          y_axis: yAxis,
-          unit: mapDefinition.unit || 'mg/stroke'
-        };
-        
-        // Initialize slider max values
-        elements.linePlotIndexSlider.max = (elements.linePlotAxisSelect.value === 'y' ? 
-          currentAnalyzedMapData.length : currentAnalyzedMapData[0].length) - 1;
-        elements.linePlotIndexSlider.value = 0;
-        elements.currentLinePlotIndexSpan.textContent = 0;
 
-        elements.mapDisplayArea.style.display = 'flex';
-        elements.saveTunedFileButton.disabled = false;
-        hasUnsavedChanges = false;
-        updateSaveStatus();
-        takeMapDataSnapshot();
-        renderCurrentChartView();
-      }, 1000);
+        const formData = new FormData();
+        formData.append("bin", currentBinFile); // Send the actual file
+        formData.append("custom_map_definition", JSON.stringify(mapDefinition)); // Always send custom definition
+
+        try {
+            const res = await fetch("https://ecu-backend-m07d.onrender.com/analyze", {
+                method: "POST",
+                body: formData
+            });
+            const data = await res.json();
+
+            if (data.error) {
+                displayStatus(elements.analysisStatus, `❌ Backend Error: ${data.error}`, 'error');
+                elements.mapDisplayArea.style.display = 'none';
+                return;
+            }
+            if (!data.map || !Array.isArray(data.map) || data.map.length === 0) {
+                displayStatus(elements.analysisStatus, "❌ ไม่พบข้อมูลแผนที่ หรือข้อมูลแผนที่ผิดปกติ", 'error');
+                elements.mapDisplayArea.style.display = 'none';
+                return;
+            }
+
+            currentAnalyzedMapData = data.map;
+            takeMapDataSnapshot(); // Take snapshot when new map data is loaded for reset
+            
+            // Populate currentAnalyzedMapInfo from backend response and mapDefinition
+            currentAnalyzedMapInfo = {
+                type: mapDefinition.name,
+                display_name: data.display_name,
+                offset: data.offset,
+                size: `${data.map.length}x${data.map[0].length}`,
+                x_axis: data.x_axis,
+                y_axis: data.y_axis,
+                unit: data.unit,
+                x_axis_offset: data.x_axis_offset,
+                y_axis_offset: data.y_axis_offset
+            };
+
+            // Update map info display
+            elements.analyzedMapDisplayName.textContent = currentAnalyzedMapInfo.display_name;
+            elements.analyzedMapOffset.textContent = decToHex(currentAnalyzedMapInfo.offset); // Ensure hex format for display
+            elements.analyzedMapSize.textContent = currentAnalyzedMapInfo.size;
+            elements.analyzedMapUnit.textContent = currentAnalyzedMapInfo.unit;
+            elements.analyzedXAxisOffset.textContent = currentAnalyzedMapInfo.x_axis_offset !== null ? decToHex(currentAnalyzedMapInfo.x_axis_offset) : 'N/A';
+            elements.analyzedYAxisOffset.textContent = currentAnalyzedMapInfo.y_axis_offset !== null ? decToHex(currentAnalyzedMapInfo.y_axis_offset) : 'N/A';
+
+
+            // Initialize slider max values based on map dimensions
+            elements.linePlotIndexSlider.max = (elements.linePlotAxisSelect.value === 'y' ? currentAnalyzedMapData.length : currentAnalyzedMapData[0].length) - 1;
+            elements.linePlotIndexSlider.value = 0;
+            elements.currentLinePlotIndexSpan.textContent = 0;
+
+            elements.mapDisplayArea.style.display = 'flex'; // Show map display area
+            elements.saveTunedFileButton.disabled = false; // Enable save button
+            hasUnsavedChanges = false; // Reset unsaved changes flag
+            updateSaveStatus(); // Update save status text
+            displayStatus(elements.analysisStatus, `✅ วิเคราะห์แผนที่ "${currentAnalyzedMapInfo.display_name}" สำเร็จ!`, 'success');
+            renderCurrentChartView(); // Render initial chart (default to Surface)
+
+        } catch (err) {
+            console.error("Fetch Error:", err);
+            displayStatus(elements.analysisStatus, "❌ เกิดข้อผิดพลาดในการวิเคราะห์ไฟล์: " + err.message, 'error');
+            elements.mapDisplayArea.style.display = 'none';
+        }
     }
 
-    function takeMapDataSnapshot() {
-      if (currentAnalyzedMapData) {
-        initialMapDataSnapshot = currentAnalyzedMapData.map(row => [...row]);
-      } else {
-        initialMapDataSnapshot = null;
-      }
-    }
-
-    let currentChartView = 'surface';
+    let currentChartView = 'surface'; // 'surface', 'line', 'table'
 
     function renderCurrentChartView() {
-      if (currentChartView === 'surface') {
-        renderSurfacePlot();
-      } else if (currentChartView === 'line') {
-        renderLinePlot();
-      } else {
-        renderEditableTable();
-      }
+        // Hide all view specific controls
+        elements.mapChartDiv.style.display = 'none';
+        elements.editableMapTableContainer.style.display = 'none';
+        elements.linePlotControls.style.display = 'none';
+
+        // Remove active class from all view buttons
+        elements.showSurfacePlotButton.classList.remove('active-view');
+        elements.showLinePlotButton.classList.remove('active-view');
+        elements.showTableButton.classList.remove('active-view');
+
+        if (currentChartView === 'surface') {
+            elements.mapChartDiv.style.display = 'block';
+            elements.showSurfacePlotButton.classList.add('active-view');
+            renderSurfacePlot();
+        } else if (currentChartView === 'line') {
+            elements.mapChartDiv.style.display = 'block';
+            elements.linePlotControls.style.display = 'flex';
+            elements.showLinePlotButton.classList.add('active-view');
+            renderLinePlot();
+        } else { // default to table
+            elements.editableMapTableContainer.style.display = 'block';
+            elements.showTableButton.classList.add('active-view');
+            renderEditableTable();
+        }
     }
 
     // --- Chart and Table Rendering Functions ---
     function renderSurfacePlot() {
-      if (!currentAnalyzedMapData || !currentAnalyzedMapInfo) return;
+        if (!currentAnalyzedMapData || !currentAnalyzedMapInfo) return;
 
-      elements.mapChartDiv.style.display = 'block';
-      elements.editableMapTableContainer.style.display = 'none';
-      elements.linePlotControls.style.display = 'none';
-
-      elements.showSurfacePlotButton.classList.add('active-view');
-      elements.showLinePlotButton.classList.remove('active-view');
-      elements.showTableButton.classList.remove('active-view');
-      currentChartView = 'surface';
-
-      // Generate surface data
-      const zData = currentAnalyzedMapData;
-      const xData = currentAnalyzedMapInfo.x_axis;
-      const yData = currentAnalyzedMapInfo.y_axis;
-
-      // Create surface plot
-      const data = [{
-        type: 'surface',
-        x: xData,
-        y: yData,
-        z: zData,
-        colorscale: 'Jet',
-        contours: {
-          z: {
-            show: true,
-            usecolormap: true,
-            highlightcolor: "#42f462",
-            project: {z: true}
-          }
-        },
-        hovertemplate: `แกน X: %{x}<br>แกน Y: %{y}<br>ค่า: %{z} ${currentAnalyzedMapInfo.unit || ""}<extra></extra>`
-      }];
-
-      const layout = {
-        title: `${currentAnalyzedMapInfo.display_name} (${currentAnalyzedMapInfo.unit || "?"})`,
-        autosize: true,
-        scene: {
-          xaxis: { title: 'แกน X' },
-          yaxis: { title: 'แกน Y' },
-          zaxis: { title: currentAnalyzedMapInfo.unit || 'ค่า' }
-        },
-        margin: { l: 0, r: 0, b: 50, t: 80 },
-        height: 500
-      };
-
-      Plotly.newPlot('mapChart', data, layout, { responsive: true });
+        Plotly.newPlot("mapChart", [{
+            z: currentAnalyzedMapData,
+            x: currentAnalyzedMapInfo.x_axis,
+            y: currentAnalyzedMapInfo.y_axis,
+            type: "surface",
+            colorscale: "Jet",
+            contours: {
+              z: {
+                show: true,
+                usecolormap: true,
+                highlightcolor: "#42f462",
+                project: {z: true}
+              }
+            },
+            hovertemplate: `X: %{x}<br>Y: %{y}<br>ค่า: %{z} ${currentAnalyzedMapInfo.unit || ""}<extra></extra>`
+        }], {
+            title: `${currentAnalyzedMapInfo.display_name} (${currentAnalyzedMapInfo.unit || "?"})`,
+            scene: {
+                xaxis: { title: currentAnalyzedMapInfo.x_axis_offset !== null ? `X-Axis (Offset: ${decToHex(currentAnalyzedMapInfo.x_axis_offset)})` : "X-Axis" },
+                yaxis: { title: currentAnalyizedMapInfo.y_axis_offset !== null ? `Y-Axis (Offset: ${decToHex(currentAnalyzedMapInfo.y_axis_offset)})` : "Y-Axis" },
+                zaxis: { title: currentAnalyzedMapInfo.unit || "Value" }
+            },
+            autosize: true,
+            margin: { l: 0, r: 0, b: 0, t: 50 },
+            height: 500
+        }, { responsive: true });
     }
 
     function renderEditableTable() {
-      if (!currentAnalyzedMapData || !currentAnalyzedMapInfo) return;
+        if (!currentAnalyzedMapData || !currentAnalyzedMapInfo) return;
 
-      elements.mapChartDiv.style.display = 'none';
-      elements.editableMapTableContainer.style.display = 'block';
-      elements.linePlotControls.style.display = 'none';
-
-      elements.showSurfacePlotButton.classList.remove('active-view');
-      elements.showLinePlotButton.classList.remove('active-view');
-      elements.showTableButton.classList.add('active-view');
-      currentChartView = 'table';
-
-      let tableHTML = `<table id="editableMapTable"><thead><tr><th class="axis-label">Y\\X</th>`;
-      
-      // X-axis headers
-      currentAnalyzedMapInfo.x_axis.forEach(x => {
-        tableHTML += `<th class="axis-label">${x !== null ? x.toFixed(2) : ''}</th>`;
-      });
-      
-      tableHTML += `</tr></thead><tbody>`;
-
-      // Map data rows
-      currentAnalyzedMapData.forEach((row, rowIndex) => {
-        tableHTML += `<tr><td class="axis-label">${currentAnalyzedMapInfo.y_axis[rowIndex] !== null ? currentAnalyzedMapInfo.y_axis[rowIndex].toFixed(2) : ''}</td>`;
-        
-        row.forEach((cellValue, colIndex) => {
-          const isModified = initialMapDataSnapshot && 
-            initialMapDataSnapshot[rowIndex][colIndex] !== cellValue;
-          
-          const cellClass = isModified ? 'modified-cell' : '';
-          tableHTML += `
-            <td contenteditable="true" 
-                data-row="${rowIndex}" 
-                data-col="${colIndex}" 
-                class="${cellClass}">
-              ${cellValue !== null ? cellValue.toFixed(2) : ''}
-            </td>
-          `;
+        let tableHTML = `<table id="editableMapTable"><thead><tr><th class="axis-label">Y\\X</th>`;
+        // X-axis headers
+        currentAnalyzedMapInfo.x_axis.forEach(x => {
+            tableHTML += `<th class="axis-label">${x !== null ? x.toFixed(2) : 'N/A'}</th>`;
         });
-        
-        tableHTML += `</tr>`;
-      });
-      
-      tableHTML += `</tbody></table>`;
-      elements.editableMapTableContainer.innerHTML = tableHTML;
+        tableHTML += `</tr></thead><tbody>`;
 
-      // Add event listeners for table cells
-      const cells = elements.editableMapTableContainer.querySelectorAll('td[contenteditable="true"]');
-      
-      cells.forEach(cell => {
-        cell.addEventListener('input', function() {
-          const row = parseInt(this.dataset.row);
-          const col = parseInt(this.dataset.col);
-          let newValue = parseFloat(this.textContent);
-          
-          if (!isNaN(newValue)) {
-            currentAnalyzedMapData[row][col] = newValue;
-            hasUnsavedChanges = true;
-            updateSaveStatus();
-            
-            // Compare with initial snapshot
-            if (initialMapDataSnapshot && 
-                initialMapDataSnapshot[row][col] !== newValue) {
-              this.classList.add('modified-cell');
-            } else {
-              this.classList.remove('modified-cell');
-            }
-          }
+        // Map data rows
+        currentAnalyzedMapData.forEach((row, rowIndex) => {
+            tableHTML += `<tr><td class="axis-label">${currentAnalyzedMapInfo.y_axis[rowIndex] !== null ? currentAnalyzedMapInfo.y_axis[rowIndex].toFixed(2) : 'N/A'}</td>`;
+            row.forEach((cellValue, colIndex) => {
+                const isModified = initialMapDataSnapshot && (initialMapDataSnapshot[rowIndex][colIndex].toFixed(2) !== cellValue.toFixed(2));
+                const cellClass = isModified ? 'modified-cell' : '';
+                tableHTML += `<td contenteditable="true" data-row="${rowIndex}" data-col="${colIndex}" class="${cellClass}">${cellValue !== null ? cellValue.toFixed(2) : 'N/A'}</td>`;
+            });
+            tableHTML += `</tr>`;
         });
-        
-        cell.addEventListener('blur', function() {
-          const row = parseInt(this.dataset.row);
-          const col = parseInt(this.dataset.col);
-          
-          if (currentAnalyzedMapData[row][col] !== null) {
-            this.textContent = currentAnalyzedMapData[row][col].toFixed(2);
-          } else {
-            this.textContent = 'N/A';
-          }
+        tableHTML += `</tbody></table>`;
+        elements.editableMapTableContainer.innerHTML = tableHTML;
+
+        // Add event listener for input changes on cells
+        elements.editableMapTableContainer.querySelectorAll('td[contenteditable="true"]').forEach(cell => {
+            cell.addEventListener('input', function() {
+                const row = parseInt(this.dataset.row);
+                const col = parseInt(this.dataset.col);
+                let newValue = parseFloat(this.innerText);
+
+                if (!isNaN(newValue)) {
+                    currentAnalyzedMapData[row][col] = newValue;
+                    hasUnsavedChanges = true; // Mark as unsaved
+                    updateSaveStatus();
+                }
+
+                // Compare with initial snapshot to mark as modified
+                const originalVal = initialMapDataSnapshot[row][col];
+                if (currentAnalyzedMapData[row][col].toFixed(2) !== originalVal.toFixed(2)) {
+                    this.classList.add('modified-cell');
+                } else {
+                    this.classList.remove('modified-cell');
+                }
+                // Re-render line plot if active and data changes
+                if (currentChartView === 'line') {
+                    renderLinePlot();
+                }
+            });
+
+            cell.addEventListener('blur', function() {
+                // Ensure numerical format on blur
+                const row = parseInt(this.dataset.row);
+                const col = parseInt(this.dataset.col);
+                if (currentAnalyzedMapData[row][col] !== null) {
+                    this.innerText = currentAnalyzedMapData[row][col].toFixed(2);
+                } else {
+                    this.innerText = 'N/A';
+                }
+                // If the value is invalid after blur, revert to last valid or original
+                if (isNaN(parseFloat(this.innerText))) {
+                    this.innerText = initialMapDataSnapshot[row][col].toFixed(2); // Revert to original if invalid
+                    currentAnalyzedMapData[row][col] = initialMapDataSnapshot[row][col];
+                    this.classList.remove('modified-cell'); // Ensure it's not marked as modified if reverted
+                    hasUnsavedChanges = initialMapDataSnapshot.some((r, ri) => r.some((c, ci) => c.toFixed(2) !== currentAnalyzedMapData[ri][ci].toFixed(2)));
+                    updateSaveStatus();
+                }
+            });
+
+            // Keyboard navigation for table cells
+            cell.addEventListener('keydown', function(e) {
+                const row = parseInt(this.dataset.row);
+                const col = parseInt(this.dataset.col);
+                const rows = currentAnalyzedMapData.length;
+                const cols = currentAnalyzedMapData[0].length;
+                
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.blur(); // Trigger blur to save changes
+                    // Move to the next cell in the same column, or next row
+                    if (row < rows - 1) {
+                        const nextCell = document.querySelector(`td[data-row="${row + 1}"][data-col="${col}"]`);
+                        if (nextCell) nextCell.focus();
+                    } else if (col < cols - 1) { // Move to next column if at last row
+                        const nextCell = document.querySelector(`td[data-row="0"][data-col="${col + 1}"]`);
+                        if (nextCell) nextCell.focus();
+                    }
+                } else if (e.key === 'Tab') {
+                    e.preventDefault(); // Prevent default tab behavior
+                    if (e.shiftKey) { // Shift+Tab - move left
+                        if (col > 0) {
+                            const prevCell = document.querySelector(`td[data-row="${row}"][data-col="${col - 1}"]`);
+                            if (prevCell) prevCell.focus();
+                        } else if (row > 0) { // Move to end of previous row
+                            const prevCell = document.querySelector(`td[data-row="${row - 1}"][data-col="${cols - 1}"]`);
+                            if (prevCell) prevCell.focus();
+                        }
+                    } else { // Tab - move right
+                        if (col < cols - 1) {
+                            const nextCell = document.querySelector(`td[data-row="${row}"][data-col="${col + 1}"]`);
+                            if (nextCell) nextCell.focus();
+                        } else if (row < rows - 1) { // Move to start of next row
+                            const nextCell = document.querySelector(`td[data-row="${row + 1}"][data-col="0"]`);
+                            if (nextCell) nextCell.focus();
+                        }
+                    }
+                } else if (e.key === 'ArrowUp' && row > 0) {
+                    e.preventDefault();
+                    const upCell = document.querySelector(`td[data-row="${row - 1}"][data-col="${col}"]`);
+                    if (upCell) upCell.focus();
+                } else if (e.key === 'ArrowDown' && row < rows - 1) {
+                    e.preventDefault();
+                    const downCell = document.querySelector(`td[data-row="${row + 1}"][data-col="${col}"]`);
+                    if (downCell) downCell.focus();
+                } else if (e.key === 'ArrowLeft' && col > 0) {
+                    e.preventDefault();
+                    const leftCell = document.querySelector(`td[data-row="${row}"][data-col="${col - 1}"]`);
+                    if (leftCell) leftCell.focus();
+                } else if (e.key === 'ArrowRight' && col < cols - 1) {
+                    e.preventDefault();
+                    const rightCell = document.querySelector(`td[data-row="${row}"][data-col="${col + 1}"]`);
+                    if (rightCell) rightCell.focus();
+                }
+            });
         });
-        
-        // Keyboard navigation
-        cell.addEventListener('keydown', function(e) {
-          const row = parseInt(this.dataset.row);
-          const col = parseInt(this.dataset.col);
-          const rows = currentAnalyzedMapData.length;
-          const cols = currentAnalyzedMapData[0].length;
-          
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            
-            if (row < rows - 1) {
-              const nextCell = document.querySelector(`td[data-row="${row + 1}"][data-col="${col}"]`);
-              if (nextCell) nextCell.focus();
-            }
-          } else if (e.key === 'Tab') {
-            e.preventDefault();
-            
-            if (e.shiftKey) {
-              // Shift+Tab - move left
-              if (col > 0) {
-                const prevCell = document.querySelector(`td[data-row="${row}"][data-col="${col - 1}"]`);
-                if (prevCell) prevCell.focus();
-              }
-            } else {
-              // Tab - move right
-              if (col < cols - 1) {
-                const nextCell = document.querySelector(`td[data-row="${row}"][data-col="${col + 1}"]`);
-                if (nextCell) nextCell.focus();
-              }
-            }
-          } else if (e.key === 'ArrowUp' && row > 0) {
-            e.preventDefault();
-            const upCell = document.querySelector(`td[data-row="${row - 1}"][data-col="${col}"]`);
-            if (upCell) upCell.focus();
-          } else if (e.key === 'ArrowDown' && row < rows - 1) {
-            e.preventDefault();
-            const downCell = document.querySelector(`td[data-row="${row + 1}"][data-col="${col}"]`);
-            if (downCell) downCell.focus();
-          } else if (e.key === 'ArrowLeft' && col > 0) {
-            e.preventDefault();
-            const leftCell = document.querySelector(`td[data-row="${row}"][data-col="${col - 1}"]`);
-            if (leftCell) leftCell.focus();
-          } else if (e.key === 'ArrowRight' && col < cols - 1) {
-            e.preventDefault();
-            const rightCell = document.querySelector(`td[data-row="${row}"][data-col="${col + 1}"]`);
-            if (rightCell) rightCell.focus();
-          }
-        });
-      });
     }
 
+    // Take a snapshot of the map data when it's first loaded for comparison
+    function takeMapDataSnapshot() {
+        if (currentAnalyzedMapData) {
+            initialMapDataSnapshot = currentAnalyzedMapData.map(row => [...row]); // Deep copy
+        } else {
+            initialMapDataSnapshot = null;
+        }
+    }
+
+    // --- Reset Map Values Button ---
+    elements.resetMapValuesButton.addEventListener('click', () => {
+        if (confirm('คุณแน่ใจหรือไม่ที่ต้องการรีเซ็ตค่า Map ทั้งหมดกลับเป็นค่าเริ่มต้นจากการวิเคราะห์? การแก้ไขที่ทำไปจะหายไป')) {
+            if (initialMapDataSnapshot) {
+                // Restore currentAnalyzedMapData from snapshot
+                currentAnalyzedMapData = initialMapDataSnapshot.map(row => [...row]);
+                hasUnsavedChanges = false; // No unsaved changes after reset
+                updateSaveStatus();
+                renderEditableTable(); // Re-render table to reflect original values
+                renderSurfacePlot(); // Re-render plot
+                renderLinePlot(); // Re-render line plot
+
+                displayStatus(elements.analysisStatus, '✅ ค่า Map ถูกรีเซ็ตกลับเป็นค่าเริ่มต้นแล้ว', 'success');
+            } else {
+                displayStatus(elements.analysisStatus, 'ℹ️ ไม่มีข้อมูลเริ่มต้นสำหรับรีเซ็ต', 'info');
+            }
+        }
+    });
+
     function renderLinePlot() {
-      if (!currentAnalyzedMapData || !currentAnalyzedMapInfo) return;
+        if (!currentAnalyzedMapData || !currentAnalyzedMapInfo) return;
 
-      elements.mapChartDiv.style.display = 'block';
-      elements.editableMapTableContainer.style.display = 'none';
-      elements.linePlotControls.style.display = 'flex';
+        const plotAxis = elements.linePlotAxisSelect.value;
+        const plotIndex = parseInt(elements.linePlotIndexSlider.value);
+        elements.currentLinePlotIndexSpan.textContent = plotIndex;
 
-      elements.showSurfacePlotButton.classList.remove('active-view');
-      elements.showLinePlotButton.classList.add('active-view');
-      elements.showTableButton.classList.remove('active-view');
-      currentChartView = 'line';
+        let xValues = [];
+        let yValues = [];
+        let title = "";
+        let xAxisTitle = "";
+        let yAxisTitle = currentAnalyzedMapInfo.unit || "Value";
 
-      const plotAxis = elements.linePlotAxisSelect.value;
-      const plotIndex = parseInt(elements.linePlotIndexSlider.value);
-      elements.currentLinePlotIndexSpan.textContent = plotIndex;
-
-      let xValues = [];
-      let yValues = [];
-      let title = "";
-      let xAxisTitle = "";
-      let yAxisTitle = currentAnalyzedMapInfo.unit || "Value";
-
-      if (plotAxis === 'y') {
-        if (plotIndex >= 0 && plotIndex < currentAnalyzedMapData.length) {
-          yValues = currentAnalyzedMapData[plotIndex];
-          xValues = currentAnalyzedMapInfo.x_axis;
-          title = `${currentAnalyzedMapInfo.display_name} - ที่ Y-Axis (Index ${plotIndex}): ${currentAnalyzedMapInfo.y_axis[plotIndex].toFixed(2)} ${currentAnalyzedMapInfo.unit || ""}`;
-          xAxisTitle = "X-Axis Value";
+        if (plotAxis === 'y') { // Plotting a row (Y-axis fixed, X-axis varies)
+            if (plotIndex >= 0 && plotIndex < currentAnalyzedMapData.length) {
+                yValues = currentAnalyzedMapData[plotIndex];
+                xValues = currentAnalyzedMapInfo.x_axis;
+                title = `${currentAnalyzedMapInfo.display_name} - Row Index ${plotIndex} (Y-Axis: ${currentAnalyzedMapInfo.y_axis[plotIndex].toFixed(2)})`;
+                xAxisTitle = `X-Axis (Offset: ${currentAnalyizedMapInfo.x_axis_offset !== null ? decToHex(currentAnalyzedMapInfo.x_axis_offset) : 'N/A'})`;
+            } else {
+                console.warn("Invalid row index for line plot.");
+                yValues = []; xValues = []; title = "No data for selected row.";
+            }
+        } else { // Plotting a column (X-axis fixed, Y-axis varies)
+            if (plotIndex >= 0 && plotIndex < currentAnalyzedMapData[0].length) {
+                yValues = currentAnalyzedMapData.map(row => row[plotIndex]);
+                xValues = currentAnalyzedMapInfo.y_axis; // Y-axis values become X-axis for column plot
+                title = `${currentAnalyzedMapInfo.display_name} - Col Index ${plotIndex} (X-Axis: ${currentAnalyzedMapInfo.x_axis[plotIndex].toFixed(2)})`;
+                xAxisTitle = `Y-Axis (Offset: ${currentAnalyzedMapInfo.y_axis_offset !== null ? decToHex(currentAnalyzedMapInfo.y_axis_offset) : 'N/A'})`;
+            } else {
+                console.warn("Invalid column index for line plot.");
+                yValues = []; xValues = []; title = "No data for selected column.";
+            }
         }
-      } else {
-        if (plotIndex >= 0 && plotIndex < currentAnalyzedMapData[0].length) {
-          yValues = currentAnalyzedMapData.map(row => row[plotIndex]);
-          xValues = currentAnalyzedMapInfo.y_axis;
-          title = `${currentAnalyzedMapInfo.display_name} - ที่ X-Axis (Index ${plotIndex}): ${currentAnalyzedMapInfo.x_axis[plotIndex].toFixed(2)} ${currentAnalyzedMapInfo.unit || ""}`;
-          xAxisTitle = "Y-Axis Value";
-        }
-      }
 
-      const trace = {
-        x: xValues,
-        y: yValues,
-        mode: 'lines+markers',
-        type: 'scatter',
-        name: 'ค่าจริง',
-        line: { color: 'rgb(75, 192, 192)', width: 3 },
-        marker: { size: 8, color: 'rgb(220, 53, 69)' }
-      };
-
-      const layout = {
-        title: title,
-        xaxis: { title: xAxisTitle },
-        yaxis: { title: yAxisTitle },
-        hovermode: 'closest',
-        showlegend: false,
-        margin: { l: 60, r: 40, b: 60, t: 80 },
-        height: 500
-      };
-
-      Plotly.newPlot('mapChart', [trace], layout, { responsive: true });
+        Plotly.newPlot("mapChart", [{
+            x: xValues,
+            y: yValues,
+            mode: "lines+markers",
+            type: "scatter",
+            name: currentAnalyzedMapInfo.display_name,
+            line: { color: 'blue' }
+        }], {
+            title: title,
+            xaxis: { title: xAxisTitle },
+            yaxis: { title: yAxisTitle },
+            autosize: true,
+            margin: { l: 50, r: 50, b: 50, t: 50 },
+            height: 500
+        }, { responsive: true });
     }
 
     // Event listeners for switching views
-    elements.showSurfacePlotButton.addEventListener('click', renderSurfacePlot);
-    elements.showTableButton.addEventListener('click', renderEditableTable);
-    elements.showLinePlotButton.addEventListener('click', renderLinePlot);
+    elements.showSurfacePlotButton.addEventListener('click', () => { currentChartView = 'surface'; renderCurrentChartView(); });
+    elements.showTableButton.addEventListener('click', () => { currentChartView = 'table'; renderCurrentChartView(); });
+    elements.showLinePlotButton.addEventListener('click', () => { currentChartView = 'line'; renderCurrentChartView(); });
 
     // Event listeners for 2D plot controls
     elements.linePlotAxisSelect.addEventListener('change', function() {
-      if (!currentAnalyzedMapData || currentAnalyzedMapData.length === 0) return;
-      elements.linePlotIndexSlider.max = (this.value === 'y' ? 
-        currentAnalyzedMapData.length : currentAnalyzedMapData[0].length) - 1;
-      elements.linePlotIndexSlider.value = 0;
-      elements.currentLinePlotIndexSpan.textContent = 0;
-      renderLinePlot();
+        if (!currentAnalyzedMapData || currentAnalyzedMapData.length === 0) return;
+        elements.linePlotIndexSlider.max = (this.value === 'y' ? currentAnalyzedMapData.length : currentAnalyzedMapData[0].length) - 1;
+        elements.linePlotIndexSlider.value = 0; // Reset slider
+        elements.currentLinePlotIndexSpan.textContent = 0; // Update span
+        renderLinePlot();
     });
 
     elements.linePlotIndexSlider.addEventListener('input', function() {
-      elements.currentLinePlotIndexSpan.textContent = this.value;
-      renderLinePlot();
+        elements.currentLinePlotIndexSpan.textContent = this.value; // Update span
+        renderLinePlot(); // Re-render plot on slider change
     });
 
     // --- Save Tuned File ---
     elements.saveTunedFileButton.addEventListener('click', async function() {
-      if (!currentBinFile || !currentAnalyzedMapData || !currentAnalyzedMapInfo) {
-        alert("❌ ไม่มีข้อมูลแผนที่หรือไฟล์ต้นฉบับที่จะบันทึก");
-        return;
-      }
+        if (!currentBinFile || !currentAnalyzedMapData || !currentAnalyzedMapInfo) {
+            displayStatus(elements.analysisStatus, "❌ ไม่มีข้อมูลแผนที่หรือไฟล์ต้นฉบับที่จะบันทึก", 'error');
+            return;
+        }
 
-      elements.saveTunedFileButton.disabled = true;
-      toggleLoadingSpinner(elements.saveTunedFileButton, true);
+        elements.saveTunedFileButton.disabled = true;
+        toggleLoadingSpinner(elements.saveTunedFileButton, true);
+        displayStatus(elements.analysisStatus, 'กำลังบันทึกไฟล์ที่จูนแล้ว...');
 
-      try {
-        // Simulate save operation
-        setTimeout(() => {
-          alert("✅ ไฟล์ที่จูนแล้วถูกบันทึกเรียบร้อย!");
-          hasUnsavedChanges = false;
-          updateSaveStatus();
-          takeMapDataSnapshot();
-          elements.saveTunedFileButton.disabled = false;
-          toggleLoadingSpinner(elements.saveTunedFileButton, false);
-        }, 1500);
-      } catch (err) {
-        alert("❌ เกิดข้อผิดพลาดในการบันทึกไฟล์ที่จูน: " + err.message);
-        elements.saveTunedFileButton.disabled = false;
-        toggleLoadingSpinner(elements.saveTunedFileButton, false);
-      }
+
+        const formData = new FormData();
+        formData.append("original_bin", currentBinFile); // Send the original File object
+
+        // Find the full map definition from userDefinedMaps based on the name/type
+        const mapDefinitionToSend = userDefinedMaps.find(def => def.name === currentAnalyzedMapInfo.type);
+        if (!mapDefinitionToSend) {
+            displayStatus(elements.analysisStatus, "❌ ไม่พบข้อมูลนิยามสำหรับแผนที่ที่กำลังจูน โปรดตรวจสอบว่าได้บันทึกแผนที่ที่กำหนดเองแล้ว", 'error');
+            elements.saveTunedFileButton.disabled = false;
+            toggleLoadingSpinner(elements.saveTunedFileButton, false);
+            return;
+        }
+        formData.append("custom_map_definition", JSON.stringify(mapDefinitionToSend)); // Always send custom definition
+
+        formData.append("modified_map_data", JSON.stringify(currentAnalyzedMapData)); // The edited map data
+
+        try {
+            const res = await fetch("https://ecu-backend-m07d.onrender.com/save_tuned_bin", {
+                method: "POST",
+                body: formData
+            });
+
+            if (!res.ok) {
+                const errorData = await res.json(); // Assume backend sends JSON error
+                throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
+            }
+
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${currentAnalyzedMapInfo.type}_tuned_${currentBinFile.name}`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+            
+            hasUnsavedChanges = false; // No unsaved changes after successful save
+            updateSaveStatus();
+            takeMapDataSnapshot(); // Take a new snapshot of the saved state
+            displayStatus(elements.analysisStatus, "✅ ไฟล์ที่จูนแล้วถูกบันทึกเรียบร้อย! ไฟล์ถูกดาวน์โหลดแล้ว.", 'success');
+
+        } catch (err) {
+            console.error("Save Error:", err);
+            displayStatus(elements.analysisStatus, "❌ เกิดข้อผิดพลาดในการบันทึกไฟล์ที่จูน: " + err.message, 'error');
+        } finally {
+            elements.saveTunedFileButton.disabled = false;
+            toggleLoadingSpinner(elements.saveTunedFileButton, false);
+        }
     });
   </script>
 </body>
 </html>
+
