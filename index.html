@@ -97,13 +97,32 @@
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
     }
+    /* Controls for 2D Plot */
+    #linePlotControls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 15px;
+        align-items: center;
+        background-color: #f0f0f0;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    #linePlotControls label {
+        font-weight: normal;
+        margin-right: 0;
+    }
+    #linePlotControls input[type="range"] {
+        flex-grow: 1;
+        min-width: 100px;
+    }
     /* Mobile-specific adjustments */
     @media (max-width: 600px) {
-      form, .controls {
+      form, .controls, #linePlotControls {
         flex-direction: column;
         align-items: stretch;
       }
-      select, input[type="file"], button {
+      select, input[type="file"], button, #linePlotControls input[type="range"] {
         width: 100%;
         min-width: unset;
       }
@@ -155,11 +174,24 @@
   <div id="glossary">คำอธิบายแผนที่จะปรากฏที่นี่</div>
 
   <div id="mapDisplayArea">
-    <div id="mapChart"></div> <div id="editableMapTableContainer"></div> </div>
+    <div id="mapChart"></div>
+    <div id="editableMapTableContainer"></div>
+    <div id="linePlotControls" style="display: none;">
+        <label for="linePlotAxis">เลือกแกน:</label>
+        <select id="linePlotAxis">
+            <option value="y">ตามแนวแกน Y (RPM)</option>
+            <option value="x">ตามแนวแกน X (LOAD)</option>
+        </select>
+        <label for="linePlotIndex">เลือก Index:</label>
+        <input type="range" id="linePlotIndex" min="0" value="0">
+        <span id="currentLinePlotIndex">0</span>
+    </div>
+  </div>
 
   <div class="controls" id="tuningControls" style="display: none;">
     <button id="saveMapButton">บันทึกค่าที่จูน (ดาวน์โหลดไฟล์)</button>
     <button id="showSurfacePlotButton">แสดงกราฟ 3D</button>
+    <button id="showLinePlotButton" style="display: none;">แสดงกราฟ 2D</button>
     <button id="showTableButton" style="display: none;">แสดงตาราง</button>
   </div>
 
@@ -188,11 +220,17 @@ let currentMapInfo = null; // Stores map metadata (type, unit, offset, x_axis, y
 const analyzeButton = document.getElementById("analyzeButton");
 const saveMapButton = document.getElementById("saveMapButton");
 const showSurfacePlotButton = document.getElementById("showSurfacePlotButton");
+const showLinePlotButton = document.getElementById("showLinePlotButton"); // New button for 2D plot
 const showTableButton = document.getElementById("showTableButton");
 const loadingSpinner = document.getElementById("loadingSpinner");
 const mapChartDiv = document.getElementById("mapChart");
 const editableMapTableContainer = document.getElementById("editableMapTableContainer");
 const tuningControls = document.getElementById("tuningControls");
+const linePlotControls = document.getElementById("linePlotControls"); // New controls div for 2D plot
+const linePlotAxisSelect = document.getElementById("linePlotAxis");
+const linePlotIndexSlider = document.getElementById("linePlotIndex");
+const currentLinePlotIndexSpan = document.getElementById("currentLinePlotIndex");
+
 
 // Function to show/hide elements
 function showElement(element) { element.style.display = 'flex'; } // Using flex for buttons row
@@ -201,6 +239,7 @@ function hideElement(element) { element.style.display = 'none'; }
 // Initial state
 hideElement(tuningControls);
 hideElement(editableMapTableContainer); // Initially hide table
+hideElement(linePlotControls); // Initially hide 2D plot controls
 
 document.getElementById("uploadForm").addEventListener("submit", async function (e) {
   e.preventDefault();
@@ -208,6 +247,7 @@ document.getElementById("uploadForm").addEventListener("submit", async function 
   saveMapButton.disabled = true; // Disable save button during analysis
   showElement(loadingSpinner);
   hideElement(tuningControls); // Hide controls until data is ready
+  hideElement(linePlotControls); // Hide 2D plot controls
 
   const fileInput = document.getElementById("binFile");
   const mapType = document.getElementById("mapType").value;
@@ -221,12 +261,9 @@ document.getElementById("uploadForm").addEventListener("submit", async function 
     return;
   }
 
-  // Frontend determines a suitable format key for backend, not backend determines directly from mapType
-  // For simplicity, we'll send mapType, and backend will fetch its conversion config
   const formData = new FormData();
   formData.append("bin", file);
   formData.append("type", mapType);
-  // formData.append("format", format); // Removed: Backend will handle conversion settings based on mapType
 
   try {
     const res = await fetch("https://ecu-backend-m07d.onrender.com/analyze", {
@@ -254,12 +291,18 @@ document.getElementById("uploadForm").addEventListener("submit", async function 
         unit: data.unit
     };
 
+    // Initialize slider max values
+    linePlotIndexSlider.max = (linePlotAxisSelect.value === 'y' ? currentMapData.length : currentMapData[0].length) - 1;
+    linePlotIndexSlider.value = 0; // Reset slider to 0
+    currentLinePlotIndexSpan.innerText = 0; // Update span
+
     // Show initial view (Surface Plot)
     renderSurfacePlot();
     showElement(tuningControls); // Show tuning controls after successful analysis
     saveMapButton.disabled = false; // Enable save button
     showTableButton.style.display = 'none'; // Initially hide table button if plot is shown
     showSurfacePlotButton.style.display = 'block'; // Ensure plot button is visible
+    showLinePlotButton.style.display = 'block'; // Show 2D plot button
 
   } catch (err) {
     console.error("Fetch Error:", err);
@@ -274,10 +317,13 @@ document.getElementById("uploadForm").addEventListener("submit", async function 
 function renderSurfacePlot() {
     if (!currentMapData || !currentMapInfo) return;
 
-    // Show Plotly, hide table
+    // Show Plotly, hide table, hide 2D controls
     showElement(mapChartDiv);
     hideElement(editableMapTableContainer);
+    hideElement(linePlotControls);
+    
     showElement(showTableButton); // Now user can switch to table
+    showElement(showLinePlotButton); // Now user can switch to 2D plot
     hideElement(showSurfacePlotButton); // Hide surface plot button when it's already shown
 
     Plotly.newPlot("mapChart", [{
@@ -294,7 +340,6 @@ function renderSurfacePlot() {
         yaxis: { title: "RPM" },
         zaxis: { title: currentMapInfo.unit || "Value" }
       },
-      // Responsive layout
       autosize: true,
       margin: { l: 0, r: 0, b: 0, t: 50 },
       height: 500
@@ -305,10 +350,13 @@ function renderSurfacePlot() {
 function renderEditableTable() {
     if (!currentMapData || !currentMapInfo) return;
 
-    // Hide Plotly, show table
+    // Hide Plotly, show table, hide 2D controls
     hideElement(mapChartDiv);
     showElement(editableMapTableContainer);
+    hideElement(linePlotControls);
+
     showElement(showSurfacePlotButton); // Now user can switch to plot
+    showElement(showLinePlotButton); // Now user can switch to 2D plot
     hideElement(showTableButton); // Hide table button when table is shown
 
     let tableHTML = `<table id="editableMapTable"><thead><tr><th class="axis-label">Y\\X</th>`;
@@ -339,13 +387,98 @@ function renderEditableTable() {
                 newValue = null; // Set to null if not a valid number
             }
             currentMapData[row][col] = newValue;
+            // Re-render line plot if active and data changes
+            if (mapChartDiv.style.display !== 'none' && linePlotControls.style.display !== 'none') {
+                renderLinePlot();
+            }
         });
     });
+}
+
+// Function to render 2D Line Plot
+function renderLinePlot() {
+    if (!currentMapData || !currentMapInfo) return;
+
+    // Show Plotly, hide table, show 2D controls
+    showElement(mapChartDiv);
+    hideElement(editableMapTableContainer);
+    showElement(linePlotControls);
+
+    showElement(showSurfacePlotButton); // Now user can switch to surface plot
+    showElement(showTableButton);       // Now user can switch to table
+    hideElement(showLinePlotButton);    // Hide line plot button when it's already shown
+
+    const plotAxis = linePlotAxisSelect.value;
+    const plotIndex = parseInt(linePlotIndexSlider.value);
+    currentLinePlotIndexSpan.innerText = plotIndex;
+
+    let xValues = [];
+    let yValues = [];
+    let title = "";
+    let xAxisTitle = "";
+    let yAxisTitle = currentMapInfo.unit || "Value";
+
+    if (plotAxis === 'y') { // Plotting a row (Y-axis fixed, X-axis varies)
+        if (plotIndex >= 0 && plotIndex < currentMapData.length) {
+            yValues = currentMapData[plotIndex];
+            xValues = currentMapInfo.x_axis;
+            title = `${currentMapInfo.display_name} - ที่ RPM: ${currentMapInfo.y_axis[plotIndex]} ${currentMapInfo.unit || ""}`;
+            xAxisTitle = "LOAD";
+        } else {
+            console.warn("Invalid row index for line plot.");
+            yValues = [];
+            xValues = [];
+            title = "No data for selected row.";
+        }
+    } else { // Plotting a column (X-axis fixed, Y-axis varies)
+        if (plotIndex >= 0 && plotIndex < currentMapData[0].length) {
+            yValues = currentMapData.map(row => row[plotIndex]);
+            xValues = currentMapInfo.y_axis;
+            title = `${currentMapInfo.display_name} - ที่ LOAD: ${currentMapInfo.x_axis[plotIndex]} ${currentMapInfo.unit || ""}`;
+            xAxisTitle = "RPM";
+        } else {
+            console.warn("Invalid column index for line plot.");
+            yValues = [];
+            xValues = [];
+            title = "No data for selected column.";
+        }
+    }
+
+    Plotly.newPlot("mapChart", [{
+      x: xValues,
+      y: yValues,
+      mode: "lines+markers",
+      type: "scatter",
+      name: currentMapInfo.display_name,
+      line: { color: 'blue' }
+    }], {
+      title: title,
+      xaxis: { title: xAxisTitle },
+      yaxis: { title: yAxisTitle },
+      autosize: true,
+      margin: { l: 50, r: 50, b: 50, t: 50 },
+      height: 500
+    }, { responsive: true });
 }
 
 // Event listeners for switching views
 showSurfacePlotButton.addEventListener('click', renderSurfacePlot);
 showTableButton.addEventListener('click', renderEditableTable);
+showLinePlotButton.addEventListener('click', renderLinePlot); // New event listener
+
+// Event listeners for 2D plot controls
+linePlotAxisSelect.addEventListener('change', function() {
+    // Update max value of slider based on selected axis
+    linePlotIndexSlider.max = (this.value === 'y' ? currentMapData.length : currentMapData[0].length) - 1;
+    linePlotIndexSlider.value = 0; // Reset slider
+    currentLinePlotIndexSpan.innerText = 0; // Update span
+    renderLinePlot();
+});
+
+linePlotIndexSlider.addEventListener('input', function() {
+    currentLinePlotIndexSpan.innerText = this.value; // Update span
+    renderLinePlot(); // Re-render plot on slider change
+});
 
 
 // Function to save (download) the modified bin file
