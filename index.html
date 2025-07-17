@@ -2,40 +2,127 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ECU Map Analyzer & Tuner</title>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background-color: #f6f6f6; color: #333; }
-    h2 { margin-bottom: 15px; color: #2a6496; }
-    form, .controls {
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
+    body {
+      font-family: Arial, sans-serif;
+      padding: 0; /* Remove default padding */
+      margin: 0; /* Remove default margin */
+      background-color: #f6f6f6;
+      color: #333;
       display: flex;
-      flex-wrap: wrap; /* Allow items to wrap on smaller screens */
-      gap: 10px; /* Space between form elements */
-      align-items: center;
+      flex-direction: column;
+      min-height: 100vh;
     }
-    label { font-weight: bold; margin-right: 5px; }
-    select, input[type="file"], button {
+    .header {
+      background-color: #2c3e50;
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+    .nav-tabs {
+      background-color: #34495e;
+      padding: 10px 20px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .nav-tabs button {
+      background: none;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      padding: 8px 15px;
+      cursor: pointer;
+      font-size: 16px;
+      border-radius: 5px;
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+    .nav-tabs button:hover:not(:disabled) {
+      background-color: #4a627d;
+      border-color: white;
+    }
+    .nav-tabs button.active {
+      background-color: #3498db;
+      border-color: #3498db;
+      font-weight: bold;
+    }
+    .nav-tabs button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      background-color: #555;
+    }
+    .save-button {
+      background-color: #28a745 !important;
+      border-color: #28a745 !important;
+    }
+    .save-button:hover:not(:disabled) {
+      background-color: #218838 !important;
+      border-color: #218838 !important;
+    }
+
+    .main-content {
+      flex-grow: 1;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center; /* Center content horizontally */
+    }
+
+    .section {
+      background-color: #fff;
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+      width: 100%;
+      max-width: 1200px; /* Max width for content sections */
+    }
+    .section h2 {
+      margin-bottom: 15px;
+      color: #2a6496;
+      text-align: center;
+    }
+
+    /* Form and Controls */
+    .form-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: center; /* Center form elements */
+    }
+    .form-controls label { font-weight: bold; margin-right: 5px; }
+    .form-controls select,
+    .form-controls input[type="file"],
+    .form-controls button,
+    .form-controls input[type="text"],
+    .form-controls input[type="number"] {
       padding: 10px 15px;
       border: 1px solid #ddd;
       border-radius: 5px;
       font-size: 16px;
-      flex-grow: 1; /* Allow elements to grow */
-      min-width: 150px; /* Minimum width for responsiveness */
+      flex-grow: 1;
+      min-width: 150px;
+      box-sizing: border-box; /* Include padding/border in element's total width/height */
     }
-    button {
+    .form-controls button {
       background-color: #4CAF50;
       color: white;
       cursor: pointer;
       border: none;
       transition: background-color 0.3s ease;
     }
-    button:hover { background-color: #45a049; }
-    button:disabled { background-color: #cccccc; cursor: not-allowed; }
+    .form-controls button:hover { background-color: #45a049; }
+    .form-controls button:disabled { background-color: #cccccc; cursor: not-allowed; }
 
     #glossary {
       margin-top: 10px;
@@ -44,26 +131,210 @@
       background-color: #e9e9e9;
       padding: 10px;
       border-radius: 5px;
+      text-align: center;
     }
-    #mapChart { margin-top: 30px; border: 1px solid #eee; border-radius: 8px; overflow: hidden; }
+
+    /* Hex Viewer Specific */
+    #hexViewer .hex-content {
+      font-family: 'Courier New', monospace;
+      white-space: pre;
+      overflow-x: auto;
+      border: 1px solid #ddd;
+      background-color: #fcfcfc;
+      padding: 10px;
+      max-height: 500px;
+      overflow-y: scroll;
+      line-height: 1.5;
+      font-size: 0.9em;
+    }
+    #hexViewer .hex-row {
+      display: flex;
+    }
+    #hexViewer .hex-offset {
+      color: #888;
+      width: 80px; /* Fixed width for offset column */
+      flex-shrink: 0;
+    }
+    #hexViewer .hex-bytes-display {
+      flex-grow: 1;
+      border-right: 1px solid #eee;
+      padding-right: 10px;
+    }
+    #hexViewer .hex-byte {
+      display: inline-block;
+      width: 2.2ch; /* For hex pair like FF */
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      border-radius: 2px;
+    }
+    #hexViewer .hex-byte.selected {
+      background-color: #add8e6; /* Light blue */
+    }
+    #hexViewer .ascii-display {
+      width: 160px; /* Fixed width for ASCII column (16 chars * ~10px) */
+      color: #555;
+      flex-shrink: 0;
+      margin-left: 10px;
+    }
+    .hex-controls {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .hex-controls button {
+      background-color: #f39c12;
+    }
+    .hex-controls button:hover {
+      background-color: #e67e22;
+    }
+    .truncated-message {
+        text-align: center;
+        font-style: italic;
+        color: #666;
+        margin-top: 10px;
+    }
+
+    /* Map Definition Form */
+    #mapDefinitionForm {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 15px;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+    }
+    #mapDefinitionForm h3 {
+        grid-column: 1 / -1;
+        text-align: center;
+        margin-top: 0;
+    }
+    #mapDefinitionForm label {
+        display: flex;
+        flex-direction: column;
+        font-weight: bold;
+    }
+    #mapDefinitionForm input[type="text"],
+    #mapDefinitionForm input[type="number"],
+    #mapDefinitionForm select {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        margin-top: 5px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    #mapDefinitionForm .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    #mapDefinitionForm .form-row {
+        display: flex;
+        gap: 10px;
+    }
+    #mapDefinitionForm .form-row > * {
+        flex: 1;
+    }
+    #mapDefinitionForm button[type="submit"] {
+        grid-column: 1 / -1;
+        background-color: #007bff;
+    }
+    #mapDefinitionForm button[type="submit"]:hover {
+        background-color: #0056b3;
+    }
+
+    /* Map List */
+    #userDefinedMapsList {
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 1px solid #eee;
+    }
+    #userDefinedMapsList h3 {
+        text-align: center;
+        margin-bottom: 15px;
+    }
+    #userDefinedMapsList ul {
+        list-style: none;
+        padding: 0;
+    }
+    #userDefinedMapsList li {
+        background-color: #f0f0f0;
+        margin-bottom: 10px;
+        padding: 10px 15px;
+        border-radius: 5px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap; /* Allow wrapping for buttons on small screens */
+    }
+    #userDefinedMapsList li span {
+        flex-grow: 1;
+        margin-bottom: 5px; /* Space between text and buttons on wrap */
+    }
+    #userDefinedMapsList li button {
+        margin-left: 10px;
+        padding: 5px 10px;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 0.8em;
+    }
+    #userDefinedMapsList li button.analyze-btn {
+        background-color: #007bff;
+        color: white;
+    }
+    #userDefinedMapsList li button.analyze-btn:hover {
+        background-color: #0056b3;
+    }
+    #userDefinedMapsList li button.delete-btn {
+        background-color: #dc3545;
+        color: white;
+    }
+    #userDefinedMapsList li button.delete-btn:hover {
+        background-color: #c82333;
+    }
+
+
+    /* Map Display Area */
+    #mapDisplayArea {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        margin-top: 20px;
+        width: 100%;
+        max-width: 1200px;
+        align-self: center; /* Center within the main-content flex container */
+    }
+    #mapChart {
+        margin-top: 0; /* Adjusted from original to fit within section */
+        border: 1px solid #eee;
+        border-radius: 8px;
+        overflow: hidden;
+        flex-grow: 1; /* Allow chart to take available space */
+        min-height: 400px; /* Ensure chart has a minimum height */
+    }
 
     /* Table styling for editing */
     #editableMapTableContainer {
-      margin-top: 20px;
-      overflow-x: auto; /* Enable horizontal scrolling for large tables */
-      max-width: 100%; /* Ensure container respects parent width */
+      margin-top: 0; /* Adjusted */
+      overflow-x: auto;
+      max-width: 100%;
+      flex-grow: 1; /* Allow table to take available space */
     }
     #editableMapTable {
-      width: 100%; /* Use 100% width for table */
+      width: 100%;
       border-collapse: collapse;
       font-size: 14px;
       text-align: center;
-      min-width: 600px; /* Ensure table is wide enough for editing */
+      min-width: 600px;
     }
     #editableMapTable th, #editableMapTable td {
       border: 1px solid #ccc;
       padding: 8px 5px;
-      white-space: nowrap; /* Prevent wrapping in cells */
+      white-space: nowrap;
     }
     #editableMapTable th {
       background-color: #e0e0e0;
@@ -83,6 +354,12 @@
         font-weight: bold;
         background-color: #f0f0f0;
     }
+    .modified-cell {
+        background-color: #fffacd !important; /* Light yellow for modified cells */
+        border-color: #f0ad4e !important;
+    }
+
+    /* Loading Spinner */
     .loading-spinner {
         display: none;
         border: 4px solid #f3f3f3;
@@ -97,6 +374,26 @@
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
     }
+
+    /* Controls for Plot/Table Toggle */
+    .tuning-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+      justify-content: center;
+    }
+    .tuning-controls button {
+        background-color: #6c757d;
+        color: white;
+    }
+    .tuning-controls button:hover {
+        background-color: #5a6268;
+    }
+    .tuning-controls button.active-view {
+        background-color: #2a6496;
+    }
+
     /* Controls for 2D Plot */
     #linePlotControls {
         display: flex;
@@ -107,6 +404,7 @@
         background-color: #f0f0f0;
         padding: 10px;
         border-radius: 5px;
+        justify-content: center;
     }
     #linePlotControls label {
         font-weight: normal;
@@ -116,419 +414,961 @@
         flex-grow: 1;
         min-width: 100px;
     }
+
     /* Mobile-specific adjustments */
-    @media (max-width: 600px) {
-      form, .controls, #linePlotControls {
+    @media (max-width: 768px) {
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .nav-tabs {
+        justify-content: center;
+      }
+      .section {
+        padding: 15px;
+        margin: 10px;
+      }
+      .form-controls, .hex-controls, .tuning-controls, #linePlotControls {
         flex-direction: column;
         align-items: stretch;
       }
-      select, input[type="file"], button, #linePlotControls input[type="range"] {
+      .form-controls select,
+      .form-controls input[type="file"],
+      .form-controls button,
+      .form-controls input[type="text"],
+      .form-controls input[type="number"] {
         width: 100%;
         min-width: unset;
       }
+      #hexViewer .hex-content {
+        font-size: 0.8em;
+      }
+      #hexViewer .hex-offset {
+        width: 60px;
+      }
+      #hexViewer .ascii-display {
+        width: 100px; /* Smaller for mobile */
+      }
       #editableMapTable {
-        font-size: 12px;
-        min-width: unset; /* Allow table to shrink on small screens */
+        font-size: 11px;
+        min-width: unset;
       }
       #editableMapTable th, #editableMapTable td {
-        padding: 5px 3px;
+        padding: 4px 2px;
+      }
+      #mapDefinitionForm {
+        grid-template-columns: 1fr; /* Single column layout for form on mobile */
       }
     }
   </style>
 </head>
 <body>
-  <h2>ECU Map Analyzer & Tuner</h2>
-  <form id="uploadForm">
-    <label for="mapType">เลือกแผนที่:</label>
-    <select id="mapType" onchange="showGlossary(this.value)">
-      <option value="limit_iq_1">Limit IQ #1</option>
-      <option value="limit_iq_2">Limit IQ #2</option>
-      <option value="limit_iq_3">Limit IQ #3</option>
-      <option value="torque_tps_1">Torque TPS #1</option>
-      <option value="torque_tps_2">Torque TPS #2</option>
-      <option value="torque_tps_3">Torque TPS #3</option>
-      <option value="egr_target">EGR Target</option>
-      <option value="pump_command">Pump Command</option>
-      <option value="injector_1">Injector #1</option>
-      <option value="injector_2">Injector #2</option>
-      <option value="limit_baro_1">Limit BARO 1</option>
-      <option value="limit_baro_2">Limit BARO 2</option>
-      <option value="limit_baro_3">Limit BARO 3</option>
-      <option value="limit_torque">Limit Torque</option>
-      <option value="torque_gear">Torque Gear</option>
-      <option value="limit_crp">Limit CRP</option>
-      <option value="green_1">Green Zone #1</option>
-      <option value="green_2">Green Zone #2</option>
-      <option value="green_3">Green Zone #3</option>
-      <option value="green_4">Green Zone #4</option>
-      <option value="green_5">Green Zone #5</option>
-      <option value="turbo">Turbo Target</option>
-      <option value="turbo_meter">Turbo Meter</option>
-      <option value="dtc_off">DTC Table</option>
-    </select>
-    <input type="file" id="binFile" accept=".bin" required />
-    <button type="submit" id="analyzeButton">วิเคราะห์แผนที่</button>
-    <div class="loading-spinner" id="loadingSpinner"></div>
-  </form>
-
-  <div id="glossary">คำอธิบายแผนที่จะปรากฏที่นี่</div>
-
-  <div id="mapDisplayArea">
-    <div id="mapChart"></div>
-    <div id="editableMapTableContainer"></div>
-    <div id="linePlotControls" style="display: none;">
-        <label for="linePlotAxis">เลือกแกน:</label>
-        <select id="linePlotAxis">
-            <option value="y">ตามแนวแกน Y (RPM)</option>
-            <option value="x">ตามแนวแกน X (LOAD)</option>
-        </select>
-        <label for="linePlotIndex">เลือก Index:</label>
-        <input type="range" id="linePlotIndex" min="0" value="0">
-        <span id="currentLinePlotIndex">0</span>
+  <div class="header">
+    <h1>ECU Map Analyzer & Tuner</h1>
+    <div class="nav-tabs">
+      <button id="navUploadFile">อัปโหลดไฟล์</button>
+      <button id="navHexView" disabled>มุมมอง Hex</button>
+      <button id="navMapDefinitions" disabled>กำหนดแผนที่</button>
+      <button id="navAnalyzeMap" disabled>วิเคราะห์/จูนแผนที่</button>
+      <button id="saveTunedFileButton" class="save-button" disabled>บันทึกไฟล์จูน</button>
     </div>
   </div>
 
-  <div class="controls" id="tuningControls" style="display: none;">
-    <button id="saveMapButton">บันทึกค่าที่จูน (ดาวน์โหลดไฟล์)</button>
-    <button id="showSurfacePlotButton">แสดงกราฟ 3D</button>
-    <button id="showLinePlotButton" style="display: none;">แสดงกราฟ 2D</button>
-    <button id="showTableButton" style="display: none;">แสดงตาราง</button>
+  <div class="main-content">
+    <div id="uploadSection" class="section">
+      <h2>อัปโหลดไฟล์ .BIN</h2>
+      <form id="uploadForm" class="form-controls">
+        <input type="file" id="binFile" accept=".bin" required />
+        <button type="submit" id="uploadFileButton">อัปโหลดไฟล์</button>
+        <div class="loading-spinner" id="analyzeInitialSpinner"></div>
+      </form>
+      <div id="glossary">คำอธิบายแผนที่จะปรากฏที่นี่</div>
+    </div>
+
+    <div id="hexViewSection" class="section" style="display: none;">
+      <h2>มุมมอง Hex ของไฟล์</h2>
+      <div class="hex-controls">
+        <button id="defineMapFromSelection" disabled>กำหนดแผนที่จากส่วนที่เลือก (0x<span id="selectedHexRangeStart"></span> - 0x<span id="selectedHexRangeEnd"></span>)</button>
+        </div>
+      <div id="hexViewer" class="hex-content">
+        <p class="truncated-message" style="display: none;">แสดงข้อมูลเพียงบางส่วนสำหรับไฟล์ขนาดใหญ่.</p>
+      </div>
+    </div>
+
+    <div id="mapDefinitionsSection" class="section" style="display: none;">
+      <h2>กำหนด/จัดการแผนที่</h2>
+      <form id="mapDefinitionForm">
+        <h3>เพิ่ม/แก้ไขข้อมูลแผนที่</h3>
+        <label>ชื่อแผนที่ (เฉพาะในโปรแกรม):<input type="text" name="name" required /></label>
+        <label>ชื่อที่แสดง (บนกราฟ/ตาราง):<input type="text" name="displayName" /></label>
+        <label>หน่วย (เช่น mg/stroke, RPM):<input type="text" name="unit" /></label>
+        <label>Offset แผนที่ (Hex/Dec):<input type="text" name="block" required placeholder="เช่น 0x1A2B, 6700" /></label>
+        <div class="form-row">
+            <label>จำนวนแถว:<input type="number" name="rows" min="1" required /></label>
+            <label>จำนวนคอลัมน์:<input type="number" name="cols" min="1" required /></label>
+        </div>
+        <div class="form-row">
+            <label>ชนิดข้อมูล:<select name="dataType">
+                <option value="8bit">8-bit</option>
+                <option value="16bit">16-bit</option>
+                </select></label>
+            <label>Endianness:<select name="endian">
+                <option value="<H">Little-endian</option>
+                <option value=">H">Big-endian</option>
+            </select></label>
+        </div>
+        <h4>การแปลงค่า (Conversion Settings)</h4>
+        <div class="form-row">
+            <label>Factor (ตัวคูณ):<input type="number" step="any" name="factor" value="1.0" /></label>
+            <label>Offset (ตัวบวก/ลบ):<input type="number" step="any" name="offset" value="0" /></label>
+        </div>
+        <h4>แกน X (X-Axis)</h4>
+        <label>Offset แกน X (Hex/Dec):<input type="text" name="xAxisOffset" placeholder="เช่น 0x1A2B, 6700" /></label>
+        <div class="form-row">
+            <label>ชนิดข้อมูลแกน X:<select name="xAxisDataType">
+                <option value="16bit">16-bit</option>
+                <option value="8bit">8-bit</option>
+                </select></label>
+            <label>Endianness แกน X:<select name="xAxisEndian">
+                <option value="<H">Little-endian</option>
+                <option value=">H">Big-endian</option>
+            </select></label>
+            <label>Scale แกน X:<input type="number" step="any" name="xScale" value="1.0" /></label>
+        </div>
+        <h4>แกน Y (Y-Axis)</h4>
+        <label>Offset แกน Y (Hex/Dec):<input type="text" name="yAxisOffset" placeholder="เช่น 0x1A2B, 6700" /></label>
+        <div class="form-row">
+            <label>ชนิดข้อมูลแกน Y:<select name="yAxisDataType">
+                <option value="16bit">16-bit</option>
+                <option value="8bit">8-bit</option>
+                </select></label>
+            <label>Endianness แกน Y:<select name="yAxisEndian">
+                <option value="<H">Little-endian</option>
+                <option value=">H">Big-endian</option>
+            </select></label>
+            <label>Scale แกน Y:<input type="number" step="any" name="yScale" value="1.0" /></label>
+        </div>
+        <button type="submit">บันทึกนิยามแผนที่</button>
+      </form>
+
+      <div id="userDefinedMapsList">
+        <h3>แผนที่ที่กำหนดเอง</h3>
+        <ul>
+          </ul>
+      </div>
+    </div>
+
+    <div id="analyzeTuneSection" class="section" style="display: none;">
+      <h2>วิเคราะห์และจูนแผนที่</h2>
+      <div class="form-controls">
+        <label for="selectAnalyzeMap">เลือกแผนที่:</label>
+        <select id="selectAnalyzeMap"></select>
+        <button id="analyzeSelectedMapButton">วิเคราะห์แผนที่ที่เลือก</button>
+        <div class="loading-spinner" id="analyzeSelectedSpinner"></div>
+      </div>
+
+      <div id="mapDisplayArea" style="display: none;">
+        <div class="tuning-controls">
+          <button id="showSurfacePlotButton" class="active-view">แสดงกราฟ 3D</button>
+          <button id="showLinePlotButton">แสดงกราฟ 2D</button>
+          <button id="showTableButton">แสดงตาราง</button>
+        </div>
+
+        <div id="mapChart" style="display: block;"></div>
+        <div id="linePlotControls" style="display: none;">
+            <label for="linePlotAxis">เลือกแกน:</label>
+            <select id="linePlotAxis">
+                <option value="y">ตามแนวแกน Y (ตาม Row)</option>
+                <option value="x">ตามแนวแกน X (ตาม Column)</option>
+            </select>
+            <label for="linePlotIndex">เลือก Index:</label>
+            <input type="range" id="linePlotIndex" min="0" value="0">
+            <span id="currentLinePlotIndex">0</span>
+        </div>
+        <div id="editableMapTableContainer" style="display: none;"></div>
+      </div>
+    </div>
   </div>
 
   <script>
-const glossary = {
-  limit_iq_1: "ปริมาณเชื้อเพลิงต่อรอบที่ ECU จำกัดไว้",
-  limit_iq_2: "แมพซ้ำสำหรับสถานการณ์ต่างกัน",
-  limit_crp: "แรงดันน้ำมันในรางแรงดันสูง",
-  torque_tps_1: "คำสั่งแรงบิดจากคันเร่ง",
-  injector_1: "แมพการฉีดน้ำมัน",
-  dtc_off: "ตารางปิดรหัสแจ้งเตือน DTC",
-  egr_target: "ระดับการหมุนเวียนไอเสียที่ต้องการ",
-  green_1: "Green Zone #1 - ค่า boost/fuel zone",
-  turbo: "Turbo target: ระดับแรงดันเทอร์โบที่สั่งงาน"
-};
+    // --- Utility Functions (Helpers) ---
+    const hexToDec = (hex) => parseInt(hex, 16);
+    const decToHex = (dec) => '0x' + dec.toString(16).toUpperCase();
 
-function showGlossary(type) {
-  document.getElementById("glossary").innerText = glossary[type] || "ไม่มีคำอธิบายสำหรับแผนที่นี้";
-}
-
-// Global variables to store current map data and file
-let currentMapData = null; // Stores parsed map data from backend
-let currentBinFile = null; // Stores the original uploaded .bin file
-let currentMapInfo = null; // Stores map metadata (type, unit, offset, x_axis, y_axis)
-
-const analyzeButton = document.getElementById("analyzeButton");
-const saveMapButton = document.getElementById("saveMapButton");
-const showSurfacePlotButton = document.getElementById("showSurfacePlotButton");
-const showLinePlotButton = document.getElementById("showLinePlotButton"); // New button for 2D plot
-const showTableButton = document.getElementById("showTableButton");
-const loadingSpinner = document.getElementById("loadingSpinner");
-const mapChartDiv = document.getElementById("mapChart");
-const editableMapTableContainer = document.getElementById("editableMapTableContainer");
-const tuningControls = document.getElementById("tuningControls");
-const linePlotControls = document.getElementById("linePlotControls"); // New controls div for 2D plot
-const linePlotAxisSelect = document.getElementById("linePlotAxis");
-const linePlotIndexSlider = document.getElementById("linePlotIndex");
-const currentLinePlotIndexSpan = document.getElementById("currentLinePlotIndex");
-
-
-// Function to show/hide elements
-function showElement(element) { element.style.display = 'flex'; } // Using flex for buttons row
-function hideElement(element) { element.style.display = 'none'; }
-
-// Initial state
-hideElement(tuningControls);
-hideElement(editableMapTableContainer); // Initially hide table
-hideElement(linePlotControls); // Initially hide 2D plot controls
-
-document.getElementById("uploadForm").addEventListener("submit", async function (e) {
-  e.preventDefault();
-  analyzeButton.disabled = true;
-  saveMapButton.disabled = true; // Disable save button during analysis
-  showElement(loadingSpinner);
-  hideElement(tuningControls); // Hide controls until data is ready
-  hideElement(linePlotControls); // Hide 2D plot controls
-
-  const fileInput = document.getElementById("binFile");
-  const mapType = document.getElementById("mapType").value;
-  const file = fileInput.files[0];
-  currentBinFile = file; // Store the original file
-
-  if (!file) {
-    alert("❌ กรุณาเลือกไฟล์ .bin");
-    analyzeButton.disabled = false;
-    hideElement(loadingSpinner);
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append("bin", file);
-  formData.append("type", mapType);
-
-  try {
-    const res = await fetch("https://ecu-backend-m07d.onrender.com/analyze", {
-      method: "POST",
-      body: formData
-    });
-    const data = await res.json();
-
-    if (data.error) {
-      alert("❌ Backend error: " + data.error);
-      return;
-    }
-    if (!data.map || !Array.isArray(data.map) || data.map.length === 0 || !Array.isArray(data.map[0])) {
-      alert("❌ ไม่พบข้อมูลแผนที่ หรือข้อมูลแผนที่ผิดปกติ");
-      return;
+    function bytesToHex(bytes) {
+      return Array.from(bytes)
+          .map(b => b.toString(16).padStart(2, '0').toUpperCase())
+          .join(' ');
     }
 
-    currentMapData = data.map; // Store the parsed map data
-    currentMapInfo = { // Store other relevant info
-        type: data.type,
-        display_name: data.display_name,
-        offset: data.offset,
-        x_axis: data.x_axis,
-        y_axis: data.y_axis,
-        unit: data.unit
+    function toAscii(bytes) {
+      return Array.from(bytes)
+          .map(b => (b >= 32 && b <= 126) ? String.fromCharCode(b) : '.')
+          .join('');
+    }
+
+    // --- Global State Variables ---
+    let currentView = 'upload'; // 'upload', 'hex', 'definitions', 'analyze'
+    let currentBinFile = null; // Stores the File object
+    let rawBinData = null; // Stores Uint8Array of the bin file
+    let fileSize = 0;
+
+    let userDefinedMaps = []; // User-added map definitions (will be saved to localStorage)
+
+    // Current map data being displayed/edited
+    let currentAnalyzedMapData = null; // Map data (2D array of real values)
+    let currentAnalyzedMapInfo = null; // Metadata of the map being analyzed (from user-defined)
+
+    // Hex Viewer Selection State
+    let hexSelectionStart = null;
+    let hexSelectionEnd = null;
+    const BYTES_PER_HEX_ROW = 16;
+    const MAX_HEX_VIEW_ROWS = 2000; // Limit rendering for performance
+
+
+    // --- DOM Elements ---
+    const elements = {
+      navUploadFile: document.getElementById("navUploadFile"),
+      navHexView: document.getElementById("navHexView"),
+      navMapDefinitions: document.getElementById("navMapDefinitions"),
+      navAnalyzeMap: document.getElementById("navAnalyzeMap"),
+      saveTunedFileButton: document.getElementById("saveTunedFileButton"),
+
+      uploadSection: document.getElementById("uploadSection"),
+      hexViewSection: document.getElementById("hexViewSection"),
+      mapDefinitionsSection: document.getElementById("mapDefinitionsSection"),
+      analyzeTuneSection: document.getElementById("analyzeTuneSection"),
+
+      binFileInput: document.getElementById("binFile"),
+      uploadFileButton: document.getElementById("uploadFileButton"),
+      analyzeInitialSpinner: document.getElementById("analyzeInitialSpinner"),
+      glossaryDiv: document.getElementById("glossary"),
+
+      hexViewerDiv: document.getElementById("hexViewer"),
+      hexSelectionStartSpan: document.getElementById("selectedHexRangeStart"),
+      hexSelectionEndSpan: document.getElementById("selectedHexRangeEnd"),
+      defineMapFromSelectionButton: document.getElementById("defineMapFromSelection"),
+
+      mapDefinitionForm: document.getElementById("mapDefinitionForm"),
+      userDefinedMapsList: document.getElementById("userDefinedMapsList").querySelector("ul"),
+
+      selectAnalyzeMapDropdown: document.getElementById("selectAnalyzeMap"),
+      analyzeSelectedMapButton: document.getElementById("analyzeSelectedMapButton"),
+      analyzeSelectedSpinner: document.getElementById("analyzeSelectedSpinner"),
+      mapDisplayArea: document.getElementById("mapDisplayArea"),
+
+      showSurfacePlotButton: document.getElementById("showSurfacePlotButton"),
+      showLinePlotButton: document.getElementById("showLinePlotButton"),
+      showTableButton: document.getElementById("showTableButton"),
+      mapChartDiv: document.getElementById("mapChart"),
+      editableMapTableContainer: document.getElementById("editableMapTableContainer"),
+
+      linePlotControls: document.getElementById("linePlotControls"),
+      linePlotAxisSelect: document.getElementById("linePlotAxis"),
+      linePlotIndexSlider: document.getElementById("linePlotIndex"),
+      currentLinePlotIndexSpan: document.getElementById("currentLinePlotIndex")
     };
 
-    // Initialize slider max values
-    linePlotIndexSlider.max = (linePlotAxisSelect.value === 'y' ? currentMapData.length : currentMapData[0].length) - 1;
-    linePlotIndexSlider.value = 0; // Reset slider to 0
-    currentLinePlotIndexSpan.innerText = 0; // Update span
-
-    // Show initial view (Surface Plot)
-    renderSurfacePlot();
-    showElement(tuningControls); // Show tuning controls after successful analysis
-    saveMapButton.disabled = false; // Enable save button
-    showTableButton.style.display = 'none'; // Initially hide table button if plot is shown
-    showSurfacePlotButton.style.display = 'block'; // Ensure plot button is visible
-    showLinePlotButton.style.display = 'block'; // Show 2D plot button
-
-  } catch (err) {
-    console.error("Fetch Error:", err);
-    alert("เกิดข้อผิดพลาดในการวิเคราะห์ไฟล์: " + err.message);
-  } finally {
-    analyzeButton.disabled = false;
-    hideElement(loadingSpinner);
-  }
-});
-
-// Function to render Plotly Surface Plot
-function renderSurfacePlot() {
-    if (!currentMapData || !currentMapInfo) return;
-
-    // Show Plotly, hide table, hide 2D controls
-    showElement(mapChartDiv);
-    hideElement(editableMapTableContainer);
-    hideElement(linePlotControls);
-    
-    showElement(showTableButton); // Now user can switch to table
-    showElement(showLinePlotButton); // Now user can switch to 2D plot
-    hideElement(showSurfacePlotButton); // Hide surface plot button when it's already shown
-
-    Plotly.newPlot("mapChart", [{
-      z: currentMapData,
-      x: currentMapInfo.x_axis,
-      y: currentMapInfo.y_axis,
-      type: "surface",
-      colorscale: "Jet",
-      hovertemplate: `LOAD: %{x}<br>RPM: %{y}<br>ค่า: %{z} ${currentMapInfo.unit || ""}<extra></extra>`
-    }], {
-      title: `${currentMapInfo.display_name} (${currentMapInfo.unit || "?"})`,
-      scene: {
-        xaxis: { title: "LOAD" },
-        yaxis: { title: "RPM" },
-        zaxis: { title: currentMapInfo.unit || "Value" }
-      },
-      autosize: true,
-      margin: { l: 0, r: 0, b: 0, t: 50 },
-      height: 500
-    }, { responsive: true });
-}
-
-// Function to render Editable Table
-function renderEditableTable() {
-    if (!currentMapData || !currentMapInfo) return;
-
-    // Hide Plotly, show table, hide 2D controls
-    hideElement(mapChartDiv);
-    showElement(editableMapTableContainer);
-    hideElement(linePlotControls);
-
-    showElement(showSurfacePlotButton); // Now user can switch to plot
-    showElement(showLinePlotButton); // Now user can switch to 2D plot
-    hideElement(showTableButton); // Hide table button when table is shown
-
-    let tableHTML = `<table id="editableMapTable"><thead><tr><th class="axis-label">Y\\X</th>`;
-    // X-axis headers
-    currentMapInfo.x_axis.forEach(x => {
-        tableHTML += `<th class="axis-label">${x !== null ? x.toFixed(2) : ''}</th>`;
-    });
-    tableHTML += `</tr></thead><tbody>`;
-
-    // Map data rows
-    currentMapData.forEach((row, rowIndex) => {
-        tableHTML += `<tr><td class="axis-label">${currentMapInfo.y_axis[rowIndex] !== null ? currentMapInfo.y_axis[rowIndex].toFixed(2) : ''}</td>`;
-        row.forEach((cellValue, colIndex) => {
-            tableHTML += `<td contenteditable="true" data-row="${rowIndex}" data-col="${colIndex}">${cellValue !== null ? cellValue.toFixed(2) : ''}</td>`;
-        });
-        tableHTML += `</tr>`;
-    });
-    tableHTML += `</tbody></table>`;
-    editableMapTableContainer.innerHTML = tableHTML;
-
-    // Add event listener for input changes
-    editableMapTableContainer.querySelectorAll('td[contenteditable="true"]').forEach(cell => {
-        cell.addEventListener('input', function() {
-            const row = parseInt(this.dataset.row);
-            const col = parseInt(this.dataset.col);
-            let newValue = parseFloat(this.innerText);
-            if (isNaN(newValue)) {
-                newValue = null; // Set to null if not a valid number
-            }
-            currentMapData[row][col] = newValue;
-            // Re-render line plot if active and data changes
-            if (mapChartDiv.style.display !== 'none' && linePlotControls.style.display !== 'none') {
-                renderLinePlot();
-            }
-        });
-    });
-}
-
-// Function to render 2D Line Plot
-function renderLinePlot() {
-    if (!currentMapData || !currentMapInfo) return;
-
-    // Show Plotly, hide table, show 2D controls
-    showElement(mapChartDiv);
-    hideElement(editableMapTableContainer);
-    showElement(linePlotControls);
-
-    showElement(showSurfacePlotButton); // Now user can switch to surface plot
-    showElement(showTableButton);       // Now user can switch to table
-    hideElement(showLinePlotButton);    // Hide line plot button when it's already shown
-
-    const plotAxis = linePlotAxisSelect.value;
-    const plotIndex = parseInt(linePlotIndexSlider.value);
-    currentLinePlotIndexSpan.innerText = plotIndex;
-
-    let xValues = [];
-    let yValues = [];
-    let title = "";
-    let xAxisTitle = "";
-    let yAxisTitle = currentMapInfo.unit || "Value";
-
-    if (plotAxis === 'y') { // Plotting a row (Y-axis fixed, X-axis varies)
-        if (plotIndex >= 0 && plotIndex < currentMapData.length) {
-            yValues = currentMapData[plotIndex];
-            xValues = currentMapInfo.x_axis;
-            title = `${currentMapInfo.display_name} - ที่ RPM: ${currentMapInfo.y_axis[plotIndex]} ${currentMapInfo.unit || ""}`;
-            xAxisTitle = "LOAD";
-        } else {
-            console.warn("Invalid row index for line plot.");
-            yValues = [];
-            xValues = [];
-            title = "No data for selected row.";
+    // --- View Management ---
+    function showSection(sectionId) {
+      const sections = [
+        elements.uploadSection,
+        elements.hexViewSection,
+        elements.mapDefinitionsSection,
+        elements.analyzeTuneSection
+      ];
+      sections.forEach(sec => {
+        sec.style.display = 'none';
+        if (sec.id === sectionId) {
+          sec.style.display = 'block';
         }
-    } else { // Plotting a column (X-axis fixed, Y-axis varies)
-        if (plotIndex >= 0 && plotIndex < currentMapData[0].length) {
-            yValues = currentMapData.map(row => row[plotIndex]);
-            xValues = currentMapInfo.y_axis;
-            title = `${currentMapInfo.display_name} - ที่ LOAD: ${currentMapInfo.x_axis[plotIndex]} ${currentMapInfo.unit || ""}`;
-            xAxisTitle = "RPM";
+      });
+
+      const navButtons = [
+        elements.navUploadFile,
+        elements.navHexView,
+        elements.navMapDefinitions,
+        elements.navAnalyzeMap
+      ];
+      navButtons.forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.id.includes(sectionId.replace('Section', ''))) {
+            btn.classList.add('active');
+        }
+      });
+      currentView = sectionId.replace('Section', '');
+    }
+
+    function toggleLoadingSpinner(spinnerElement, show) {
+      spinnerElement.style.display = show ? 'inline-block' : 'none';
+    }
+
+    function updateNavButtonsState() {
+      const fileLoaded = !!currentBinFile;
+      elements.navHexView.disabled = !fileLoaded;
+      elements.navMapDefinitions.disabled = !fileLoaded;
+      elements.navAnalyzeMap.disabled = !fileLoaded;
+      elements.saveTunedFileButton.disabled = !fileLoaded || !currentAnalyzedMapData; // Only enable if a map is analyzed
+    }
+
+    // --- Initial Setup ---
+    document.addEventListener("DOMContentLoaded", () => {
+      showSection('uploadSection');
+      loadUserDefinedMapsFromStorage();
+      populateMapDropdowns();
+      updateNavButtonsState();
+    });
+
+    // --- Navigation Event Listeners ---
+    elements.navUploadFile.addEventListener('click', () => showSection('uploadSection'));
+    elements.navHexView.addEventListener('click', () => {
+      showSection('hexViewSection');
+      if (rawBinData) {
+        renderHexViewer(rawBinData, fileSize);
+      }
+    });
+    elements.navMapDefinitions.addEventListener('click', () => {
+      showSection('mapDefinitionsSection');
+      renderUserDefinedMapsList(); // Re-render list when navigating to it
+    });
+    elements.navAnalyzeMap.addEventListener('click', () => {
+      showSection('analyzeTuneSection');
+      if (currentAnalyzedMapData) {
+          // Re-render chart/table if already analyzed
+          renderCurrentChartView();
+      } else {
+          elements.mapDisplayArea.style.display = 'none'; // Hide map display if no map is loaded
+      }
+    });
+
+    // --- Upload File Logic ---
+    elements.uploadForm.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      elements.uploadFileButton.disabled = true;
+      elements.saveTunedFileButton.disabled = true;
+      toggleLoadingSpinner(elements.analyzeInitialSpinner, true);
+
+      const file = elements.binFileInput.files[0];
+      currentBinFile = file; // Store the original file globally
+
+      if (!file) {
+        alert("❌ กรุณาเลือกไฟล์ .bin");
+        elements.uploadFileButton.disabled = false;
+        toggleLoadingSpinner(elements.analyzeInitialSpinner, false);
+        return;
+      }
+
+      // Read file into Uint8Array for local Hex Viewer
+      const arrayBuffer = await file.arrayBuffer();
+      rawBinData = new Uint8Array(arrayBuffer);
+      fileSize = file.size;
+      updateNavButtonsState(); // Enable other nav buttons
+
+      alert("✅ อัปโหลดไฟล์สำเร็จ! ตอนนี้คุณสามารถดู Hex หรือกำหนดแผนที่ได้");
+      showSection('hexViewSection'); // Go to Hex View after successful upload
+      renderHexViewer(rawBinData, fileSize);
+
+      elements.uploadFileButton.disabled = false;
+      toggleLoadingSpinner(elements.analyzeInitialSpinner, false);
+    });
+
+    // --- Glossary (kept for general info, not tied to mapType dropdown anymore) ---
+    // This part is no longer dynamically updated by the mapType dropdown
+    // If you want to use this, you'd need to tie it to the selected map in analyze section
+    const glossaryDescriptions = {
+      // Example:
+      // "my_custom_iq_map": "แผนที่กำหนดเองสำหรับปริมาณเชื้อเพลิง",
+      // "another_map": "แผนที่ที่ผู้ใช้สร้างขึ้นสำหรับวัตถุประสงค์เฉพาะ"
+    };
+
+    function showGlossary(type) {
+      elements.glossaryDiv.innerText = glossaryDescriptions[type] || "ไม่มีคำอธิบายสำหรับแผนที่นี้";
+    }
+
+    // --- Hex Viewer Logic ---
+    let selectedHexStartOffset = null;
+    let selectedHexEndOffset = null;
+
+    function renderHexViewer(data, size) {
+        elements.hexViewerDiv.innerHTML = `<p>ขนาดไฟล์: ${size} ไบต์</p><div class="hex-content-inner"></div><p class="truncated-message" style="display: none;">แสดงข้อมูลเพียงบางส่วนสำหรับไฟล์ขนาดใหญ่.</p>`;
+        const hexContentInner = elements.hexViewerDiv.querySelector('.hex-content-inner');
+        const numRowsToShow = Math.min(Math.ceil(data.length / BYTES_PER_HEX_ROW), MAX_HEX_VIEW_ROWS);
+        const isTruncated = data.length > MAX_HEX_VIEW_ROWS * BYTES_PER_HEX_ROW;
+
+        for (let i = 0; i < numRowsToShow; i++) {
+            const offset = i * BYTES_PER_HEX_ROW;
+            const rowBytes = data.slice(offset, offset + BYTES_PER_HEX_ROW);
+
+            const rowDiv = document.createElement('div');
+            rowDiv.classList.add('hex-row');
+            rowDiv.innerHTML = `<span class="hex-offset">0x${offset.toString(16).padStart(8, '0')}</span><span class="hex-bytes-display"></span><span class="ascii-display"></span>`;
+
+            const hexBytesSpan = rowDiv.querySelector('.hex-bytes-display');
+            rowBytes.forEach((byte, byteIndex) => {
+                const currentOffset = offset + byteIndex;
+                const byteSpan = document.createElement('span');
+                byteSpan.classList.add('hex-byte');
+                byteSpan.innerText = byte.toString(16).padStart(2, '0').toUpperCase();
+                byteSpan.dataset.offset = currentOffset;
+                byteSpan.addEventListener('click', (e) => handleHexByteClick(e, currentOffset));
+                hexBytesSpan.appendChild(byteSpan);
+            });
+            rowDiv.querySelector('.ascii-display').innerText = toAscii(rowBytes);
+            hexContentInner.appendChild(rowDiv);
+        }
+
+        if (isTruncated) {
+            elements.hexViewerDiv.querySelector('.truncated-message').style.display = 'block';
         } else {
-            console.warn("Invalid column index for line plot.");
-            yValues = [];
-            xValues = [];
-            title = "No data for selected column.";
+            elements.hexViewerDiv.querySelector('.truncated-message').style.display = 'none';
+        }
+        updateHexSelectionDisplay();
+    }
+
+    function handleHexByteClick(event, offset) {
+        if (event.shiftKey) {
+            // Extend selection
+            if (selectedHexStartOffset !== null) {
+                const newStart = Math.min(selectedHexStartOffset, offset);
+                const newEnd = Math.max(selectedHexEndOffset, offset); // Use current end or clicked offset
+                selectedHexStartOffset = newStart;
+                selectedHexEndOffset = newEnd;
+            } else {
+                selectedHexStartOffset = offset;
+                selectedHexEndOffset = offset;
+            }
+        } else {
+            // New selection
+            selectedHexStartOffset = offset;
+            selectedHexEndOffset = offset;
+        }
+        updateHexSelectionDisplay();
+    }
+
+    function updateHexSelectionDisplay() {
+        const allHexBytes = elements.hexViewerDiv.querySelectorAll('.hex-byte');
+        allHexBytes.forEach(span => {
+            const offset = parseInt(span.dataset.offset);
+            if (selectedHexStartOffset !== null && selectedHexEndOffset !== null &&
+                offset >= selectedHexStartOffset && offset <= selectedHexEndOffset) {
+                span.classList.add('selected');
+            } else {
+                span.classList.remove('selected');
+            }
+        });
+
+        if (selectedHexStartOffset !== null && selectedHexEndOffset !== null) {
+            elements.hexSelectionStartSpan.innerText = selectedHexStartOffset.toString(16).toUpperCase();
+            elements.hexSelectionEndSpan.innerText = selectedHexEndOffset.toString(16).toUpperCase();
+            elements.defineMapFromSelectionButton.disabled = false;
+        } else {
+            elements.hexSelectionStartSpan.innerText = '';
+            elements.hexSelectionEndSpan.innerText = '';
+            elements.defineMapFromSelectionButton.disabled = true;
         }
     }
 
-    Plotly.newPlot("mapChart", [{
-      x: xValues,
-      y: yValues,
-      mode: "lines+markers",
-      type: "scatter",
-      name: currentMapInfo.display_name,
-      line: { color: 'blue' }
-    }], {
-      title: title,
-      xaxis: { title: xAxisTitle },
-      yaxis: { title: yAxisTitle },
-      autosize: true,
-      margin: { l: 50, r: 50, b: 50, t: 50 },
-      height: 500
-    }, { responsive: true });
-}
+    elements.defineMapFromSelectionButton.addEventListener('click', () => {
+        if (selectedHexStartOffset !== null && selectedHexEndOffset !== null) {
+            const form = elements.mapDefinitionForm;
+            form.querySelector('[name="block"]').value = decToHex(selectedHexStartOffset);
 
-// Event listeners for switching views
-showSurfacePlotButton.addEventListener('click', renderSurfacePlot);
-showTableButton.addEventListener('click', renderEditableTable);
-showLinePlotButton.addEventListener('click', renderLinePlot); // New event listener
+            // Calculate approximate rows/cols based on selection length and common map sizes
+            const selectionLength = selectedHexEndOffset - selectedHexStartOffset + 1;
+            let defaultCols = 16; // Common default
+            let defaultRows = Math.ceil(selectionLength / (defaultCols * 2)); // Assume 16bit for now
+            if (selectionLength % (defaultCols * 1) === 0) { // Check for 8bit
+                defaultRows = selectionLength / (defaultCols * 1);
+                form.querySelector('[name="dataType"]').value = '8bit';
+            } else if (selectionLength % (defaultCols * 2) === 0) { // Check for 16bit
+                 defaultRows = selectionLength / (defaultCols * 2);
+                 form.querySelector('[name="dataType"]').value = '16bit';
+            }
+            form.querySelector('[name="rows"]').value = defaultRows;
+            form.querySelector('[name="cols"]').value = defaultCols;
 
-// Event listeners for 2D plot controls
-linePlotAxisSelect.addEventListener('change', function() {
-    // Update max value of slider based on selected axis
-    linePlotIndexSlider.max = (this.value === 'y' ? currentMapData.length : currentMapData[0].length) - 1;
-    linePlotIndexSlider.value = 0; // Reset slider
-    currentLinePlotIndexSpan.innerText = 0; // Update span
-    renderLinePlot();
-});
+            showSection('mapDefinitionsSection'); // Switch to map definition section
+            // Reset selection after defining map
+            selectedHexStartOffset = null;
+            selectedHexEndOffset = null;
+            updateHexSelectionDisplay();
+        }
+    });
 
-linePlotIndexSlider.addEventListener('input', function() {
-    currentLinePlotIndexSpan.innerText = this.value; // Update span
-    renderLinePlot(); // Re-render plot on slider change
-});
+    // --- Map Definition Form Logic ---
+    function saveUserDefinedMapsToStorage() {
+        localStorage.setItem('userDefinedMaps', JSON.stringify(userDefinedMaps));
+    }
+
+    function loadUserDefinedMapsFromStorage() {
+        const storedMaps = localStorage.getItem('userDefinedMaps');
+        if (storedMaps) {
+            userDefinedMaps = JSON.parse(storedMaps);
+        }
+    }
+
+    function populateMapDropdowns() {
+        // Clear and populate dropdown in analyze section
+        elements.selectAnalyzeMapDropdown.innerHTML = '';
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.innerText = '-- เลือกแผนที่เพื่อวิเคราะห์ --';
+        elements.selectAnalyzeMapDropdown.appendChild(defaultOption);
+
+        userDefinedMaps.forEach(mapDef => {
+            const option = document.createElement('option');
+            option.value = mapDef.name; // Use unique name for user-defined maps
+            option.innerText = `[Custom] ${mapDef.displayName || mapDef.name}`;
+            elements.selectAnalyzeMapDropdown.appendChild(option);
+        });
+    }
+
+    function renderUserDefinedMapsList() {
+        elements.userDefinedMapsList.innerHTML = '';
+        if (userDefinedMaps.length === 0) {
+            elements.userDefinedMapsList.innerHTML = '<p>ยังไม่มีแผนที่ที่กำหนดเอง</p>';
+            return;
+        }
+        userDefinedMaps.forEach(mapDef => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <span><strong>${mapDef.displayName || mapDef.name}</strong> (${mapDef.size[0]}x${mapDef.size[1]} @ ${decToHex(mapDef.block)})</span>
+                <div>
+                    <button class="analyze-btn" data-map-name="${mapDef.name}">วิเคราะห์</button>
+                    <button class="delete-btn" data-map-name="${mapDef.name}">ลบ</button>
+                </div>
+            `;
+            elements.userDefinedMapsList.appendChild(li);
+        });
+
+        elements.userDefinedMapsList.querySelectorAll('.analyze-btn').forEach(button => {
+            button.addEventListener('click', async (e) => {
+                const mapName = e.target.dataset.mapName;
+                const mapDef = userDefinedMaps.find(m => m.name === mapName);
+                if (mapDef) {
+                    elements.selectAnalyzeMapDropdown.value = mapName; // Pre-select in analyze dropdown
+                    await analyzeAndRenderMap(mapDef);
+                    showSection('analyzeTuneSection');
+                }
+            });
+        });
+
+        elements.userDefinedMapsList.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const mapName = e.target.dataset.mapName;
+                if (confirm(`คุณแน่ใจหรือไม่ที่ต้องการลบแผนที่ "${mapName}"?`)) {
+                    userDefinedMaps = userDefinedMaps.filter(m => m.name !== mapName);
+                    saveUserDefinedMapsToStorage();
+                    populateMapDropdowns();
+                    renderUserDefinedMapsList();
+                    alert(`แผนที่ "${mapName}" ถูกลบแล้ว`);
+                }
+            });
+        });
+    }
+
+    elements.mapDefinitionForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const newMapDef = {};
+        for (let [key, value] of formData.entries()) {
+            newMapDef[key] = value;
+        }
+
+        // Validate and convert types
+        try {
+            newMapDef.block = hexToDec(newMapDef.block);
+            newMapDef.rows = parseInt(newMapDef.rows);
+            newMapDef.cols = parseInt(newMapDef.cols);
+            newMapDef.factor = parseFloat(newMapDef.factor);
+            newMapDef.offset = parseFloat(newMapDef.offset);
+            newMapDef.xScale = parseFloat(newMapDef.xScale);
+            newMapDef.yScale = parseFloat(newMapDef.yScale);
+            newMapDef.xAxisOffset = newMapDef.xAxisOffset ? hexToDec(newMapDef.xAxisOffset) : null;
+            newMapDef.yAxisOffset = newMapDef.yAxisOffset ? hexToDec(newMapDef.yAxisOffset) : null;
+        } catch (error) {
+            alert('❌ ข้อผิดพลาดในการแปลงข้อมูล: โปรดตรวจสอบค่า Offset, Rows, Cols, Factor, Offset, Scale ว่าเป็นตัวเลขที่ถูกต้อง');
+            return;
+        }
+
+        // Assign type and display properties
+        newMapDef.type = newMapDef.name; // Use name as unique type for custom maps
+        newMapDef.displayName = newMapDef.displayName || newMapDef.name;
+        newMapDef.size = [newMapDef.rows, newMapDef.cols]; // Ensure size array is present
+
+        // Check if map with same name already exists
+        const existingIndex = userDefinedMaps.findIndex(m => m.name === newMapDef.name);
+        if (existingIndex > -1) {
+            if (confirm(`แผนที่ "${newMapDef.name}" มีอยู่แล้ว คุณต้องการอัปเดตหรือไม่?`)) {
+                userDefinedMaps[existingIndex] = newMapDef;
+                alert(`✅ แผนที่ "${newMapDef.name}" ถูกอัปเดตแล้ว`);
+            } else {
+                return;
+            }
+        } else {
+            userDefinedMaps.push(newMapDef);
+            alert(`✅ แผนที่ "${newMapDef.name}" ถูกบันทึกแล้ว`);
+        }
+
+        saveUserDefinedMapsToStorage();
+        populateMapDropdowns(); // Update dropdowns
+        renderUserDefinedMapsList(); // Re-render list
+        this.reset(); // Clear form
+    });
+
+    // --- Analyze Selected Map Logic ---
+    elements.analyzeSelectedMapButton.addEventListener('click', async () => {
+        const selectedMapName = elements.selectAnalyzeMapDropdown.value;
+        if (!selectedMapName) {
+            alert("❌ กรุณาเลือกแผนที่ที่จะวิเคราะห์");
+            return;
+        }
+        if (!currentBinFile) {
+            alert("❌ กรุณาอัปโหลดไฟล์ .bin ก่อน");
+            showSection('uploadSection');
+            return;
+        }
+
+        elements.analyzeSelectedMapButton.disabled = true;
+        toggleLoadingSpinner(elements.analyzeSelectedSpinner, true);
+        elements.mapDisplayArea.style.display = 'none'; // Hide current display
+
+        const mapDefinitionToAnalyze = userDefinedMaps.find(def => def.name === selectedMapName);
+
+        if (!mapDefinitionToAnalyze) {
+            alert("❌ ไม่พบข้อมูลนิยามแผนที่สำหรับแผนที่ที่เลือก");
+            elements.analyzeSelectedMapButton.disabled = false;
+            toggleLoadingSpinner(elements.analyzeSelectedSpinner, false);
+            return;
+        }
+
+        await analyzeAndRenderMap(mapDefinitionToAnalyze);
+
+        elements.analyzeSelectedMapButton.disabled = false;
+        toggleLoadingSpinner(elements.analyzeSelectedSpinner, false);
+    });
+
+    async function analyzeAndRenderMap(mapDefinition) {
+        if (!currentBinFile) return;
+
+        const formData = new FormData();
+        formData.append("bin", currentBinFile); // Send the actual file
+        formData.append("custom_map_definition", JSON.stringify(mapDefinition)); // Always send custom definition
+
+        try {
+            const res = await fetch("https://ecu-backend-m07d.onrender.com/analyze", {
+                method: "POST",
+                body: formData
+            });
+            const data = await res.json();
+
+            if (data.error) {
+                alert("❌ Backend error: " + data.error);
+                elements.mapDisplayArea.style.display = 'none';
+                return;
+            }
+            if (!data.map || !Array.isArray(data.map) || data.map.length === 0) {
+                alert("❌ ไม่พบข้อมูลแผนที่ หรือข้อมูลแผนที่ผิดปกติ");
+                elements.mapDisplayArea.style.display = 'none';
+                return;
+            }
+
+            currentAnalyzedMapData = data.map;
+            takeMapDataSnapshot(); // Take snapshot when new map data is loaded
+            currentAnalyzedMapInfo = {
+                type: mapDefinition.name, // Use the name from the definition as the type
+                display_name: mapDefinition.displayName || mapDefinition.name,
+                offset: mapDefinition.block, // Keep the original offset for save operation
+                x_axis: data.x_axis,
+                y_axis: data.y_axis,
+                unit: mapDefinition.unit
+            };
+
+            // Initialize slider max values based on map dimensions
+            elements.linePlotIndexSlider.max = (elements.linePlotAxisSelect.value === 'y' ? currentAnalyzedMapData.length : currentAnalyzedMapData[0].length) - 1;
+            elements.linePlotIndexSlider.value = 0;
+            elements.currentLinePlotIndexSpan.innerText = 0;
+
+            elements.mapDisplayArea.style.display = 'flex'; // Show map display area
+            elements.saveTunedFileButton.disabled = false; // Enable save button
+            renderCurrentChartView(); // Render initial chart (default to Surface)
+
+        } catch (err) {
+            console.error("Fetch Error:", err);
+            alert("เกิดข้อผิดพลาดในการวิเคราะห์ไฟล์: " + err.message);
+            elements.mapDisplayArea.style.display = 'none';
+        }
+    }
+
+    let currentChartView = 'surface'; // 'surface', 'line', 'table'
+
+    function renderCurrentChartView() {
+        if (currentChartView === 'surface') {
+            renderSurfacePlot();
+        } else if (currentChartView === 'line') {
+            renderLinePlot();
+        } else { // default to table
+            renderEditableTable();
+        }
+    }
+
+    // --- Chart and Table Rendering Functions ---
+    function renderSurfacePlot() {
+      if (!currentAnalyzedMapData || !currentAnalyzedMapInfo) return;
+
+      elements.mapChartDiv.style.display = 'block';
+      elements.editableMapTableContainer.style.display = 'none';
+      elements.linePlotControls.style.display = 'none';
+
+      elements.showSurfacePlotButton.classList.add('active-view');
+      elements.showLinePlotButton.classList.remove('active-view');
+      elements.showTableButton.classList.remove('active-view');
+      currentChartView = 'surface';
+
+      Plotly.newPlot("mapChart", [{
+        z: currentAnalyzedMapData,
+        x: currentAnalyzedMapInfo.x_axis,
+        y: currentAnalyzedMapInfo.y_axis,
+        type: "surface",
+        colorscale: "Jet",
+        hovertemplate: `LOAD: %{x}<br>RPM: %{y}<br>ค่า: %{z} ${currentAnalyzedMapInfo.unit || ""}<extra></extra>`
+      }], {
+        title: `${currentAnalyzedMapInfo.display_name} (${currentAnalyzedMapInfo.unit || "?"})`,
+        scene: {
+          xaxis: { title: "LOAD" },
+          yaxis: { title: "RPM" },
+          zaxis: { title: currentAnalyzedMapInfo.unit || "Value" }
+        },
+        autosize: true,
+        margin: { l: 0, r: 0, b: 0, t: 50 },
+        height: 500
+      }, { responsive: true });
+    }
+
+    function renderEditableTable() {
+      if (!currentAnalyzedMapData || !currentAnalyzedMapInfo) return;
+
+      elements.mapChartDiv.style.display = 'none';
+      elements.editableMapTableContainer.style.display = 'block';
+      elements.linePlotControls.style.display = 'none';
+
+      elements.showSurfacePlotButton.classList.remove('active-view');
+      elements.showLinePlotButton.classList.remove('active-view');
+      elements.showTableButton.classList.add('active-view');
+      currentChartView = 'table';
+
+      let tableHTML = `<table id="editableMapTable"><thead><tr><th class="axis-label">Y\\X</th>`;
+      // X-axis headers
+      currentAnalyzedMapInfo.x_axis.forEach(x => {
+          tableHTML += `<th class="axis-label">${x !== null ? x.toFixed(2) : ''}</th>`;
+      });
+      tableHTML += `</tr></thead><tbody>`;
+
+      // Map data rows
+      currentAnalyzedMapData.forEach((row, rowIndex) => {
+          tableHTML += `<tr><td class="axis-label">${currentAnalyzedMapInfo.y_axis[rowIndex] !== null ? currentAnalyzedMapInfo.y_axis[rowIndex].toFixed(2) : ''}</td>`;
+          row.forEach((cellValue, colIndex) => {
+              // Add a class for modified cells (if any were modified before switching views)
+              const cellClass = initialMapDataSnapshot && initialMapDataSnapshot[rowIndex][colIndex] !== cellValue ? 'modified-cell' : '';
+              tableHTML += `<td contenteditable="true" data-row="${rowIndex}" data-col="${colIndex}" class="${cellClass}">${cellValue !== null ? cellValue.toFixed(2) : ''}</td>`;
+          });
+          tableHTML += `</tr>`;
+      });
+      tableHTML += `</tbody></table>`;
+      elements.editableMapTableContainer.innerHTML = tableHTML;
+
+      // Add event listener for input changes
+      elements.editableMapTableContainer.querySelectorAll('td[contenteditable="true"]').forEach(cell => {
+          cell.addEventListener('input', function() {
+              const row = parseInt(this.dataset.row);
+              const col = parseInt(this.dataset.col);
+              let newValue = parseFloat(this.innerText);
+
+              if (isNaN(newValue)) {
+                  this.classList.add('modified-cell'); // Still mark as modified if user typed something invalid
+              } else {
+                  currentAnalyzedMapData[row][col] = newValue;
+                  // Compare with initial snapshot to mark as modified
+                  if (initialMapDataSnapshot && initialMapDataSnapshot[row][col] !== newValue) {
+                      this.classList.add('modified-cell');
+                  } else {
+                      this.classList.remove('modified-cell');
+                  }
+              }
+              // Re-render line plot if active and data changes
+              if (currentChartView === 'line') { // Only re-render if line plot is currently visible
+                  renderLinePlot();
+              }
+          });
+
+          cell.addEventListener('blur', function() {
+              // Ensure numerical format on blur
+              const row = parseInt(this.dataset.row);
+              const col = parseInt(this.dataset.col);
+              if (currentAnalyzedMapData[row][col] !== null) {
+                  this.innerText = currentAnalyzedMapData[row][col].toFixed(2);
+              } else {
+                  this.innerText = 'N/A'; // Or whatever default for null
+              }
+          });
+
+          cell.addEventListener('keydown', function(e) {
+              if (e.key === 'Enter') {
+                  e.preventDefault(); // Prevent new line
+                  this.blur(); // Trigger blur to save changes
+              }
+          });
+      });
+    }
+
+    // Take a snapshot of the map data when it's first loaded for comparison
+    let initialMapDataSnapshot = null;
+    function takeMapDataSnapshot() {
+        if (currentAnalyzedMapData) {
+            initialMapDataSnapshot = currentAnalyzedMapData.map(row => [...row]); // Deep copy
+        } else {
+            initialMapDataSnapshot = null;
+        }
+    }
 
 
-// Function to save (download) the modified bin file
-saveMapButton.addEventListener('click', async function() {
-    if (!currentBinFile || !currentMapData || !currentMapInfo) {
+    function renderLinePlot() {
+      if (!currentAnalyzedMapData || !currentAnalyzedMapInfo) return;
+
+      elements.mapChartDiv.style.display = 'block';
+      elements.editableMapTableContainer.style.display = 'none';
+      elements.linePlotControls.style.display = 'flex'; // Use flex for controls
+
+      elements.showSurfacePlotButton.classList.remove('active-view');
+      elements.showLinePlotButton.classList.add('active-view');
+      elements.showTableButton.classList.remove('active-view');
+      currentChartView = 'line';
+
+      const plotAxis = elements.linePlotAxisSelect.value;
+      const plotIndex = parseInt(elements.linePlotIndexSlider.value);
+      elements.currentLinePlotIndexSpan.innerText = plotIndex;
+
+      let xValues = [];
+      let yValues = [];
+      let title = "";
+      let xAxisTitle = "";
+      let yAxisTitle = currentAnalyzedMapInfo.unit || "Value";
+
+      if (plotAxis === 'y') { // Plotting a row (Y-axis fixed, X-axis varies)
+          if (plotIndex >= 0 && plotIndex < currentAnalyzedMapData.length) {
+              yValues = currentAnalyzedMapData[plotIndex];
+              xValues = currentAnalyzedMapInfo.x_axis;
+              title = `${currentAnalyzedMapInfo.display_name} - ที่ Y-Axis (Index ${plotIndex}): ${currentAnalyzedMapInfo.y_axis[plotIndex].toFixed(2)} ${currentAnalyzedMapInfo.unit || ""}`;
+              xAxisTitle = "X-Axis Value";
+          } else {
+              console.warn("Invalid row index for line plot.");
+              yValues = []; xValues = []; title = "No data for selected row.";
+          }
+      } else { // Plotting a column (X-axis fixed, Y-axis varies)
+          if (plotIndex >= 0 && plotIndex < currentAnalyzedMapData[0].length) {
+              yValues = currentAnalyzedMapData.map(row => row[plotIndex]);
+              xValues = currentAnalyzedMapInfo.y_axis; // Y-axis values become X-axis for column plot
+              title = `${currentAnalyzedMapInfo.display_name} - ที่ X-Axis (Index ${plotIndex}): ${currentAnalyzedMapInfo.x_axis[plotIndex].toFixed(2)} ${currentAnalyzedMapInfo.unit || ""}`;
+              xAxisTitle = "Y-Axis Value";
+          } else {
+              console.warn("Invalid column index for line plot.");
+              yValues = []; xValues = []; title = "No data for selected column.";
+          }
+      }
+
+      Plotly.newPlot("mapChart", [{
+        x: xValues,
+        y: yValues,
+        mode: "lines+markers",
+        type: "scatter",
+        name: currentAnalyzedMapInfo.display_name,
+        line: { color: 'blue' }
+      }], {
+        title: title,
+        xaxis: { title: xAxisTitle },
+        yaxis: { title: yAxisTitle },
+        autosize: true,
+        margin: { l: 50, r: 50, b: 50, t: 50 },
+        height: 500
+      }, { responsive: true });
+    }
+
+    // Event listeners for switching views
+    elements.showSurfacePlotButton.addEventListener('click', renderSurfacePlot);
+    elements.showTableButton.addEventListener('click', renderEditableTable);
+    elements.showLinePlotButton.addEventListener('click', renderLinePlot);
+
+    // Event listeners for 2D plot controls
+    elements.linePlotAxisSelect.addEventListener('change', function() {
+        if (!currentAnalyzedMapData || currentAnalyzedMapData.length === 0) return;
+        elements.linePlotIndexSlider.max = (this.value === 'y' ? currentAnalyzedMapData.length : currentAnalyzedMapData[0].length) - 1;
+        elements.linePlotIndexSlider.value = 0; // Reset slider
+        elements.currentLinePlotIndexSpan.innerText = 0; // Update span
+        renderLinePlot();
+    });
+
+    elements.linePlotIndexSlider.addEventListener('input', function() {
+        elements.currentLinePlotIndexSpan.innerText = this.value; // Update span
+        renderLinePlot(); // Re-render plot on slider change
+    });
+
+
+    // --- Save Tuned File ---
+    elements.saveTunedFileButton.addEventListener('click', async function() {
+      if (!currentBinFile || !currentAnalyzedMapData || !currentAnalyzedMapInfo) {
         alert("❌ ไม่มีข้อมูลแผนที่หรือไฟล์ต้นฉบับที่จะบันทึก");
         return;
-    }
+      }
 
-    saveMapButton.disabled = true;
-    showElement(loadingSpinner);
+      elements.saveTunedFileButton.disabled = true;
+      toggleLoadingSpinner(elements.saveTunedFileButton, true);
 
-    const formData = new FormData();
-    formData.append("original_bin", currentBinFile); // Send the original file
-    formData.append("map_type", currentMapInfo.type); // Which map was edited
-    formData.append("modified_map_data", JSON.stringify(currentMapData)); // The edited map data
+      const formData = new FormData();
+      formData.append("original_bin", currentBinFile); // Send the original File object
 
-    try {
-        const res = await fetch("https://ecu-backend-m07d.onrender.com/save_tuned_bin", { // New endpoint for saving
-            method: "POST",
-            body: formData
+      // Find the full map definition from userDefinedMaps based on the name/type
+      const mapDefinitionToSend = userDefinedMaps.find(def => def.name === currentAnalyzedMapInfo.type);
+      if (!mapDefinitionToSend) {
+          alert("❌ ไม่พบข้อมูลนิยามสำหรับแผนที่ที่กำลังจูน โปรดตรวจสอบว่าได้บันทึกแผนที่ที่กำหนดเองแล้ว");
+          elements.saveTunedFileButton.disabled = false;
+          toggleLoadingSpinner(elements.saveTunedFileButton, false);
+          return;
+      }
+      formData.append("custom_map_definition", JSON.stringify(mapDefinitionToSend)); // Always send custom definition
+
+      formData.append("modified_map_data", JSON.stringify(currentAnalyzedMapData)); // The edited map data
+
+      try {
+        const res = await fetch("https://ecu-backend-m07d.onrender.com/save_tuned_bin", {
+          method: "POST",
+          body: formData
         });
 
         if (!res.ok) {
-            const errorText = await res.text();
-            throw new Error(`HTTP error! status: ${res.status}, body: ${errorText}`);
+          const errorText = await res.text();
+          throw new Error(`HTTP error! status: ${res.status}, body: ${errorText}`);
         }
 
-        const blob = await res.blob(); // Get the response as a blob (binary data)
+        const blob = await res.blob();
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${currentMapInfo.type}_tuned_${currentBinFile.name}`; // Suggest a filename
+        a.download = `${currentAnalyzedMapInfo.type}_tuned_${currentBinFile.name}`;
         document.body.appendChild(a);
         a.click();
         a.remove();
         window.URL.revokeObjectURL(url);
         alert("✅ ไฟล์ที่จูนแล้วถูกบันทึกเรียบร้อย!");
 
-    } catch (err) {
+      } catch (err) {
         console.error("Save Error:", err);
         alert("❌ เกิดข้อผิดพลาดในการบันทึกไฟล์ที่จูน: " + err.message);
-    } finally {
-        saveMapButton.disabled = false;
-        hideElement(loadingSpinner);
-    }
-});
+      } finally {
+        elements.saveTunedFileButton.disabled = false;
+        toggleLoadingSpinner(elements.saveTunedFileButton, false);
+      }
+    });
 
-// Initial glossary load
-showGlossary(document.getElementById("mapType").value);
   </script>
 </body>
 </html>
